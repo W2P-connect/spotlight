@@ -1,0 +1,41 @@
+.check {
+    margin: auto;
+    width: 18px;
+    height: 18px;
+    -webkit-tap-highlight-color: transparent;
+    transform: translate3d(0, 0, 0);
+}
+
+.check svg {
+    position: relative;
+    z-index: 1;
+    fill: none;
+    stroke-width: 1;
+    transition: all 0.2s ease;
+}
+
+.check svg path {
+    stroke-dasharray: 60;
+    stroke-dashoffset: 0;
+}
+
+.check svg polyline {
+    stroke-dasharray: 22;
+    stroke-dashoffset: 66;
+}
+
+.custom-w2p-checkbox:checked+.check svg {
+    stroke: rgba(var(--primary-color));
+}
+
+.check:has(.custom-w2p-checkbox:checked) svg path {
+    stroke-dashoffset: 60;
+    transition: all 0.3s linear;
+}
+
+.check:has(.custom-w2p-checkbox:checked) svg polyline {
+    stroke-dashoffset: 42;
+    transition: all 0.2s linear;
+    transition-delay: 0.15s;
+    stroke: rgba(var(--secondary-color));
+}
