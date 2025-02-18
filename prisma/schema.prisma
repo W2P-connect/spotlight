@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEXT_PUBLIC_POSTGRES_PRISMA_URL")
+}
+
+model Profile {
+  id       String  @id @default(uuid()) @db.Uuid
+  role     Role    @default(user)
+  fullName String? @map("full_name")
+
+  workoutPrograms  WorkoutProgram[]
+  workoutTemplates WorkoutTemplate[]
+  exercises        Exercise[]
+  WorkoutHistory   WorkoutHistory[]
+
+  @@map("profile")
+}
+
+model WorkoutProgram {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  startDate     DateTime?
+  endDate       DateTime?
+  totalSessions Int?
+
+  ownerId String  @db.Uuid // Ajout de `@db.Uuid` pour correspondre à `Profile.id`
+  owner   Profile @relation(fields: [ownerId], references: [id])
+
+  workoutTemplates WorkoutProgramWorkoutTemplate[]
+
+  @@map("workout_program")
+}
+
+model WorkoutTemplate {
+  id   String @id @default(uuid()) @db.Uuid
+  name String
+
+  ownerId String  @db.Uuid
+  owner   Profile @relation(fields: [ownerId], references: [id])
+
+  workoutPrograms WorkoutProgramWorkoutTemplate[]
+  exercises       WorkoutTemplateExercise[]
+  WorkoutHistory  WorkoutHistory[]
+
+  @@map("workout_template")
+}
+
+model WorkoutHistory {
+  id      String   @id @default(uuid()) @db.Uuid
+  date    DateTime @default(now())
+  ownerId String   @db.Uuid
+  owner   Profile  @relation(fields: [ownerId], references: [id])
+
+  workoutTemplateId String?          @db.Uuid
+  workoutTemplate   WorkoutTemplate? @relation(fields: [workoutTemplateId], references: [id])
+
+  exercises WorkoutHistoryExercise[]
+
+  @@map("workout_history")
+}
+
+model Exercise {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String
+  isPublic Boolean @default(false)
+
+  ownerId String?  @db.Uuid // Null si c'est un exercice public
+  owner   Profile? @relation(fields: [ownerId], references: [id])
+
+  workoutTemplates WorkoutTemplateExercise[]
+  workoutHistories WorkoutHistoryExercise[]
+
+  @@map("exercise")
+}
+
+model WorkoutProgramWorkoutTemplate {
+  id                String @id @default(uuid()) @db.Uuid
+  workoutProgramId  String @db.Uuid
+  workoutTemplateId String @db.Uuid
+
+  workoutProgram  WorkoutProgram  @relation(fields: [workoutProgramId], references: [id])
+  workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id])
+
+  @@unique([workoutProgramId, workoutTemplateId])
+  @@map("workout_program_workout_template")
+}
+
+model WorkoutHistoryExercise {
+  id               String @id @default(uuid()) @db.Uuid
+  workoutHistoryId String @db.Uuid
+  exerciseId       String @db.Uuid
+  nbReps           Int[] // Nombre exact de répétitions par série
+  restTime         Int?
+
+  workoutHistory WorkoutHistory @relation(fields: [workoutHistoryId], references: [id])
+  exercise       Exercise       @relation(fields: [exerciseId], references: [id])
+
+  @@unique([workoutHistoryId, exerciseId])
+  @@map("workout_history_exercise")
+}
+
+model WorkoutTemplateExercise {
+  id                String @id @default(uuid()) @db.Uuid
+  workoutTemplateId String @db.Uuid
+  exerciseId        String @db.Uuid
+  minReps           Int[] // Fourchette min par série
+  maxReps           Int[] // Fourchette max par série
+  restTime          Int? // Temps de repos en secondes
+
+  workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id])
+  exercise        Exercise        @relation(fields: [exerciseId], references: [id])
+
+  @@unique([workoutTemplateId, exerciseId])
+  @@map("workout_template_exercise")
+}
+
+enum Role {
+  admin
+  user
+}
