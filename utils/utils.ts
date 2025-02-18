@@ -17,6 +17,10 @@ export function encodedRedirect(
   return redirect(`${path}?${type}=${encodeURIComponent(message)}`);
 }
 
+export const classNames = (...classes: string[]) => {
+    return classes.filter(Boolean).join(' ')
+}
+
 export const callApi = async <T = any>(
   url: string,
   method: HTTPMethod = 'GET',
