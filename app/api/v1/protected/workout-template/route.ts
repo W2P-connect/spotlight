@@ -5,48 +5,39 @@ import { prisma } from '@/lib/prisma';
 
 export const GET = async (req: NextRequest) => {
     try {
-        const userId = req.headers.get("x-user-id") as string;
+        const userId = req.headers.get("x-user-id") as string //From middleware;
         const searchParams = req.nextUrl.searchParams;
 
-        // Récupération des filtres
         const workoutTemplateId = searchParams.get('workoutTemplateId');
         const workoutProgramId = searchParams.get('workoutProgramId');
-        const sortOrder = searchParams.get('date') || 'newest'; // Par défaut "newest"
+        const sortOrder = searchParams.get('date') || 'newest';
 
-        console.log(searchParams);
-        
         const whereClause: any = {
             ownerId: userId
         };
         if (workoutTemplateId) {
-            whereClause.workoutTemplateId = workoutTemplateId;
+            whereClause.id = workoutTemplateId;
         }
         if (workoutProgramId) {
-            whereClause.workoutTemplate = {
-                workoutPrograms: {
-                    some: {
-                        id: workoutProgramId
-                    }
+            whereClause.workoutPrograms = {
+                some: {
+                    id: workoutProgramId
                 }
-            };
+            }
         }
 
-        // Requête Prisma
-        const workoutHistory = await prisma?.workoutHistory.findMany({
+        const workoutTemplates = await prisma?.workoutTemplate.findMany({
             where: whereClause,
             include: {
-                workoutTemplate: {
-                    include: {
-                        workoutPrograms: true
-                    }
-                }
+                WorkoutHistory: true,
+                workoutPrograms: true,
             },
             orderBy: {
-                date: sortOrder === 'newest' ? 'desc' : 'asc'
+                createdAt: sortOrder === 'newest' ? 'desc' : 'asc'
             }
-        });
+        })
 
-        if (!workoutHistory) {
+        if (!workoutTemplates) {
             return NextResponse.json({
                 message: 'No Workout History found',
                 data: [],
@@ -54,16 +45,18 @@ export const GET = async (req: NextRequest) => {
             }, { status: 404 });
         }
 
-        // console.log(workoutHistory);
+        console.log("workoutTemplates", workoutTemplates);
 
         return NextResponse.json({
-            message: 'Successfully retrieved workout history',
-            data: workoutHistory,
+            message: 'Successfully retrieved workout templates',
+            data: workoutTemplates,
             success: true,
         }, { status: 200 });
+
     } catch (err) {
+        console.error(err);
         return NextResponse.json({
-            message: 'Failed to retrieve workout history',
+            message: 'Failed to retrieve profile data',
             data: [],
             success: false,
         }, { status: 500 });

@@ -12,6 +12,9 @@ model Profile {
   role     Role    @default(user)
   fullName String? @map("full_name")
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   workoutPrograms  WorkoutProgram[]
   workoutTemplates WorkoutTemplate[]
   exercises        Exercise[]
@@ -26,22 +29,26 @@ model WorkoutProgram {
   startDate     DateTime?
   endDate       DateTime?
   totalSessions Int?
+  ownerId       String    @db.Uuid
 
-  ownerId String  @db.Uuid // Ajout de `@db.Uuid` pour correspondre à `Profile.id`
-  owner   Profile @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
+  owner            Profile                         @relation(fields: [ownerId], references: [id])
   workoutTemplates WorkoutProgramWorkoutTemplate[]
 
   @@map("workout_program")
 }
 
 model WorkoutTemplate {
-  id   String @id @default(uuid()) @db.Uuid
-  name String
+  id      String @id @default(uuid()) @db.Uuid
+  name    String
+  ownerId String @db.Uuid
 
-  ownerId String  @db.Uuid
-  owner   Profile @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
+  owner           Profile                         @relation(fields: [ownerId], references: [id])
   workoutPrograms WorkoutProgramWorkoutTemplate[]
   exercises       WorkoutTemplateExercise[]
   WorkoutHistory  WorkoutHistory[]
@@ -50,15 +57,17 @@ model WorkoutTemplate {
 }
 
 model WorkoutHistory {
-  id      String   @id @default(uuid()) @db.Uuid
-  date    DateTime @default(now())
-  ownerId String   @db.Uuid
-  owner   Profile  @relation(fields: [ownerId], references: [id])
+  id                String   @id @default(uuid()) @db.Uuid
+  date              DateTime @default(now())
+  ownerId           String   @db.Uuid
+  workoutTemplateId String?  @db.Uuid
 
-  workoutTemplateId String?          @db.Uuid
-  workoutTemplate   WorkoutTemplate? @relation(fields: [workoutTemplateId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  exercises WorkoutHistoryExercise[]
+  owner           Profile                  @relation(fields: [ownerId], references: [id])
+  workoutTemplate WorkoutTemplate?         @relation(fields: [workoutTemplateId], references: [id])
+  exercises       WorkoutHistoryExercise[]
 
   @@map("workout_history")
 }
@@ -67,10 +76,12 @@ model Exercise {
   id       String  @id @default(uuid()) @db.Uuid
   name     String
   isPublic Boolean @default(false)
+  ownerId  String? @db.Uuid // Null si c'est un exercice public
 
-  ownerId String?  @db.Uuid // Null si c'est un exercice public
-  owner   Profile? @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
+  owner            Profile?                  @relation(fields: [ownerId], references: [id])
   workoutTemplates WorkoutTemplateExercise[]
   workoutHistories WorkoutHistoryExercise[]
 
@@ -81,6 +92,9 @@ model WorkoutProgramWorkoutTemplate {
   id                String @id @default(uuid()) @db.Uuid
   workoutProgramId  String @db.Uuid
   workoutTemplateId String @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   workoutProgram  WorkoutProgram  @relation(fields: [workoutProgramId], references: [id])
   workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id])
@@ -95,6 +109,9 @@ model WorkoutHistoryExercise {
   exerciseId       String @db.Uuid
   nbReps           Int[] // Nombre exact de répétitions par série
   restTime         Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   workoutHistory WorkoutHistory @relation(fields: [workoutHistoryId], references: [id])
   exercise       Exercise       @relation(fields: [exerciseId], references: [id])
@@ -111,6 +128,9 @@ model WorkoutTemplateExercise {
   maxReps           Int[] // Fourchette max par série
   restTime          Int? // Temps de repos en secondes
 
+  createdAt           DateTime                                @default(now())
+  updatedAt           DateTime                                @default(now()) @updatedAt
+  
   workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id])
   exercise        Exercise        @relation(fields: [exerciseId], references: [id])
 
