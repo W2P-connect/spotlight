@@ -10,7 +10,7 @@ export const GET = async (req: NextRequest) => {
 
         const profileData = await getProfileData(userId);
 
-        if (!profileData) { 
+        if (!profileData) {
             return NextResponse.json({
                 message: 'Profile not found',
                 data: [],

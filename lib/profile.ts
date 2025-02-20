@@ -54,7 +54,21 @@ const getProfileData = async (userId: Profile["id"]) => {
         }),
     ]);
 
-    return { user, workoutPrograms, workoutTemplates, exercises, workoutHistory };
+    console.log("user", {
+        ...user.user,
+        workoutPrograms: workoutPrograms,
+        workoutTemplates: workoutTemplates,
+        exercises: exercises,
+        workoutHistory: workoutHistory
+    });
+
+    return {
+        ...user.user,
+        workoutPrograms: workoutPrograms,
+        workoutTemplates: workoutTemplates,
+        exercises: exercises,
+        workoutHistory: workoutHistory
+    };
 };
 
 export default getProfileData;  
