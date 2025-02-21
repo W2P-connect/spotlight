@@ -14,7 +14,7 @@ export const GET = async (req: NextRequest) => {
         const sortOrder = searchParams.get('date') || 'newest'; // Par défaut "newest"
 
         console.log(searchParams);
-        
+
         const whereClause: any = {
             ownerId: userId
         };
@@ -37,7 +37,11 @@ export const GET = async (req: NextRequest) => {
             include: {
                 workoutTemplate: {
                     include: {
-                        workoutPrograms: true
+                        workoutPrograms: {
+                            include: {
+                                workoutProgram: true
+                            }
+                        }
                     }
                 }
             },
@@ -54,11 +58,21 @@ export const GET = async (req: NextRequest) => {
             }, { status: 404 });
         }
 
+        const formattedWorkoutHistory = workoutHistory.map(history => ({
+            ...history,
+            workoutTemplate: history.workoutTemplate
+                ? {
+                    ...history.workoutTemplate,
+                    workoutPrograms: history.workoutTemplate.workoutPrograms.map(wp => wp.workoutProgram)
+                }
+                : null
+        }));
+
         // console.log(workoutHistory);
 
         return NextResponse.json({
             message: 'Successfully retrieved workout history',
-            data: workoutHistory,
+            data: formattedWorkoutHistory,
             success: true,
         }, { status: 200 });
     } catch (err) {

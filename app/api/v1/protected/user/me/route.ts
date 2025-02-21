@@ -17,7 +17,6 @@ export const GET = async (req: NextRequest) => {
                 success: false,
             }, { status: 404 });
         }
-
         return NextResponse.json({
             message: 'Profile retrieved successfully',
             data: profileData,
