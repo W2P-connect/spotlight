@@ -36,6 +36,7 @@ model WorkoutProgram {
 
   owner            Profile                         @relation(fields: [ownerId], references: [id])
   workoutTemplates WorkoutProgramWorkoutTemplate[]
+  workoutHistory WorkoutHistory[]
 
   @@map("workout_program")
 }
@@ -61,16 +62,19 @@ model WorkoutHistory {
   date              DateTime @default(now())
   ownerId           String   @db.Uuid
   workoutTemplateId String?  @db.Uuid
+  workoutProgramId  String?  @db.Uuid  // Ajout de la référence au programme
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
   owner           Profile                  @relation(fields: [ownerId], references: [id])
   workoutTemplate WorkoutTemplate?         @relation(fields: [workoutTemplateId], references: [id])
+  workoutProgram  WorkoutProgram?          @relation(fields: [workoutProgramId], references: [id]) // Relation avec le programme
   exercises       WorkoutHistoryExercise[]
 
   @@map("workout_history")
 }
+
 
 model Exercise {
   id       String  @id @default(uuid()) @db.Uuid
