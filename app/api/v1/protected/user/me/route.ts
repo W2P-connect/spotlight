@@ -9,7 +9,7 @@ export const GET = async (req: NextRequest) => {
         const userId = req.headers.get("x-user-id") as string //From middleware;
 
         const profileData = await getProfileData(userId);
-
+        
         if (!profileData) {
             return NextResponse.json({
                 message: 'Profile not found',

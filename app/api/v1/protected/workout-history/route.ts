@@ -35,20 +35,15 @@ export const GET = async (req: NextRequest) => {
         const workoutHistory = await prisma?.workoutHistory.findMany({
             where: whereClause,
             include: {
-                workoutTemplate: {
-                    include: {
-                        workoutPrograms: {
-                            include: {
-                                workoutProgram: true
-                            }
-                        }
-                    }
-                }
+                exercises: true,
             },
             orderBy: {
                 date: sortOrder === 'newest' ? 'desc' : 'asc'
             }
         });
+
+
+        console.log(workoutHistory);
 
         if (!workoutHistory) {
             return NextResponse.json({
@@ -58,21 +53,9 @@ export const GET = async (req: NextRequest) => {
             }, { status: 404 });
         }
 
-        const formattedWorkoutHistory = workoutHistory.map(history => ({
-            ...history,
-            workoutTemplate: history.workoutTemplate
-                ? {
-                    ...history.workoutTemplate,
-                    workoutPrograms: history.workoutTemplate.workoutPrograms.map(wp => wp.workoutProgram)
-                }
-                : null
-        }));
-
-        // console.log(workoutHistory);
-
         return NextResponse.json({
             message: 'Successfully retrieved workout history',
-            data: formattedWorkoutHistory,
+            data: workoutHistory,
             success: true,
         }, { status: 200 });
     } catch (err) {

@@ -48,19 +48,10 @@ const getProfileData = async (userId: Profile["id"]) => {
         prisma.workoutHistory.findMany({
             where: { ownerId: userId },
             include: {
-                workoutTemplate: true,
                 exercises: { include: { exercise: true } },
             },
         }),
     ]);
-
-    console.log("user", {
-        ...user.user,
-        workoutPrograms: workoutPrograms,
-        workoutTemplates: workoutTemplates,
-        exercises: exercises,
-        workoutHistory: workoutHistory
-    });
 
     return {
         ...user.user,
