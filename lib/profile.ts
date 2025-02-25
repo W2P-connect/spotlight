@@ -25,7 +25,7 @@ const getProfileData = async (userId: Profile["id"]) => {
         prisma.workoutProgram.findMany({
             where: { ownerId: userId },
             include: {
-                workoutTemplates: {
+                workoutTemplateLinks: {
                     include: {
                         workoutTemplate: {
                             include: {
@@ -39,7 +39,9 @@ const getProfileData = async (userId: Profile["id"]) => {
         prisma.workoutTemplate.findMany({
             where: { ownerId: userId },
             include: {
-                exercises: { include: { exercise: true } },
+                workoutHistory: { include: { exercises: { include: { exercise: true } } } },
+                workoutProgramLinks: { include: { workoutProgram: true } },
+                exercises: true
             },
         }),
         prisma.exercise.findMany({
@@ -53,10 +55,16 @@ const getProfileData = async (userId: Profile["id"]) => {
         }),
     ]);
 
+    const formattedWorkoutTemplates = workoutTemplates.map(({ workoutProgramLinks, ...rest }) => ({
+        ...rest,
+        workoutPrograms: workoutProgramLinks.map(link => link.workoutProgram)
+    }));
+
+
     return {
         ...user.user,
         workoutPrograms: workoutPrograms,
-        workoutTemplates: workoutTemplates,
+        workoutTemplates: formattedWorkoutTemplates,
         exercises: exercises,
         workoutHistory: workoutHistory
     };

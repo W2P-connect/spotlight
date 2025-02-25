@@ -29,8 +29,9 @@ export const GET = async (req: NextRequest) => {
         const workoutTemplates = await prisma?.workoutTemplate.findMany({
             where: whereClause,
             include: {
-                WorkoutHistory: true,
-                workoutPrograms: true,
+                workoutHistory: { include: { exercises: { include: { exercise: true } } } },
+                workoutProgramLinks: { include: { workoutProgram: true } },
+                exercises: true
             },
             orderBy: {
                 createdAt: sortOrder === 'newest' ? 'desc' : 'asc'
@@ -45,11 +46,15 @@ export const GET = async (req: NextRequest) => {
             }, { status: 404 });
         }
 
-        console.log("workoutTemplates", workoutTemplates);
+
+        const formattedWorkoutTemplates = workoutTemplates.map(({ workoutProgramLinks, ...rest }) => ({
+            ...rest,
+            workoutPrograms: workoutProgramLinks.map(link => link.workoutProgram)
+        }));
 
         return NextResponse.json({
             message: 'Successfully retrieved workout templates',
-            data: workoutTemplates,
+            data: formattedWorkoutTemplates,
             success: true,
         }, { status: 200 });
 
