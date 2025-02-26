@@ -25,10 +25,10 @@ model Profile {
 
 model WorkoutProgram {
   id            String    @id @default(uuid()) @db.Uuid
+  index         Int       @unique @default(autoincrement())
   name          String
   startDate     DateTime?
   endDate       DateTime?
-  totalSessions Int?
   ownerId       String    @db.Uuid
 
   createdAt DateTime @default(now())

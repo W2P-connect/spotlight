@@ -34,6 +34,7 @@ const getProfileData = async (userId: Profile["id"]) => {
                         },
                     },
                 },
+                workoutHistory: true
             },
         }),
         prisma.workoutTemplate.findMany({
