@@ -24,12 +24,12 @@ model Profile {
 }
 
 model WorkoutProgram {
-  id            String    @id @default(uuid()) @db.Uuid
-  index         Int       @unique @default(autoincrement())
-  name          String
-  startDate     DateTime?
-  endDate       DateTime?
-  ownerId       String    @db.Uuid
+  id        String    @id @default(uuid()) @db.Uuid
+  index     Int       @unique @default(autoincrement())
+  name      String
+  startDate DateTime?
+  endDate   DateTime?
+  ownerId   String    @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -63,9 +63,9 @@ model WorkoutHistory {
   ownerId           String   @db.Uuid
   workoutTemplateId String?  @db.Uuid
   workoutProgramId  String?  @db.Uuid // Ajout de la référence au programme
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  comment           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now()) @updatedAt
 
   owner           Profile                  @relation(fields: [ownerId], references: [id])
   workoutTemplate WorkoutTemplate?         @relation(fields: [workoutTemplateId], references: [id])
