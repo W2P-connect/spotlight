@@ -23,15 +23,21 @@ async function authenticateUser(request: NextRequest) {
 export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/v1/protected")) {
     const { user, response, error } = await authenticateUser(request);
-    
+
     if (error) return response;
 
     const modifiedHeaders = new Headers(request.headers);
 
-    if(user?.id) {
+    if (user?.id) {
       modifiedHeaders.set("x-user-id", user.id);
+    } else {
+      return NextResponse.json({
+        message: 'Unauthorized: user-id header is missing',
+        data: [],
+        success: false,
+      }, { status: 401 });
     }
-    
+
     return NextResponse.next({ request: { headers: modifiedHeaders } });
   }
 

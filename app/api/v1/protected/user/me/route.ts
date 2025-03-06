@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import getProfileData from '@/lib/profile';
 import { createClient } from '@/utils/supabase/server';
+import { delay } from '@/utils/utils';
 import { NextResponse, NextRequest } from 'next/server';
 
 export const GET = async (req: NextRequest) => {
@@ -9,7 +10,7 @@ export const GET = async (req: NextRequest) => {
         const userId = req.headers.get("x-user-id") as string //From middleware;
 
         const profileData = await getProfileData(userId);
-        
+
         if (!profileData) {
             return NextResponse.json({
                 message: 'Profile not found',

@@ -85,3 +85,6 @@ export const callApi = async <T = any>(
       }
   }
 };
+
+export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+

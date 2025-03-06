@@ -11,17 +11,22 @@ export const GET = async (req: NextRequest) => {
         const whereClause: any = {
             ownerId: userId
         };
-    
+
         const workoutPrograms = await prisma.workoutProgram.findMany({
             where: whereClause,
             include: {
+                workoutTemplateLinks: {
+                    orderBy: {
+                        order: 'asc'
+                    }
+                },
                 workoutHistory: true
-            }
+            },
         })
 
         if (!workoutPrograms) {
             return NextResponse.json({
-                message: 'No Workout History found',
+                message: 'No Workout Programs found',
                 data: [],
                 success: false,
             }, { status: 404 });
@@ -33,11 +38,12 @@ export const GET = async (req: NextRequest) => {
             success: true,
         }, { status: 200 });
 
-    } catch (err) {
+    } catch (err: TypeError | any) {
         console.error(err);
         return NextResponse.json({
-            message: 'Failed to retrieve profile data',
+            message: err.message ?? 'Unknown Error',
             data: [],
+            error: err,
             success: false,
         }, { status: 500 });
     }

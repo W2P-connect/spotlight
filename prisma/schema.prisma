@@ -95,6 +95,7 @@ model WorkoutProgramWorkoutTemplate {
   id                String @id @default(uuid()) @db.Uuid
   workoutProgramId  String @db.Uuid
   workoutTemplateId String @db.Uuid
+  order             Int    @default(1) //Ordre de la séance dans le program
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -113,6 +114,7 @@ model WorkoutHistoryExercise {
   nbReps           Int[]
   weight           Int[]
   restTime         Int?
+  order            Int    @default(1)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -131,6 +133,7 @@ model WorkoutTemplateExercise {
   minReps           Int[] // Fourchette min par série
   maxReps           Int[] // Fourchette max par série
   restTime          Int? // Temps de repos en secondes
+  order             Int    @default(1)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
