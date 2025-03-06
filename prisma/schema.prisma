@@ -108,13 +108,14 @@ model WorkoutProgramWorkoutTemplate {
 }
 
 model WorkoutHistoryExercise {
-  id               String @id @default(uuid()) @db.Uuid
-  workoutHistoryId String @db.Uuid
-  exerciseId       String @db.Uuid
+  id               String  @id @default(uuid()) @db.Uuid
+  workoutHistoryId String  @db.Uuid
+  exerciseId       String  @db.Uuid
   nbReps           Int[]
   weight           Int[]
   restTime         Int?
-  order            Int    @default(1)
+  order            Int     @default(1)
+  supersetId       String? @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -127,13 +128,14 @@ model WorkoutHistoryExercise {
 }
 
 model WorkoutTemplateExercise {
-  id                String @id @default(uuid()) @db.Uuid
-  workoutTemplateId String @db.Uuid
-  exerciseId        String @db.Uuid
+  id                String  @id @default(uuid()) @db.Uuid
+  workoutTemplateId String  @db.Uuid
+  exerciseId        String  @db.Uuid
   minReps           Int[] // Fourchette min par série
   maxReps           Int[] // Fourchette max par série
   restTime          Int? // Temps de repos en secondes
-  order             Int    @default(1)
+  order             Int     @default(1)
+  supersetId        String? @db.Uuid
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
