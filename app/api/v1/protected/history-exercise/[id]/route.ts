@@ -5,11 +5,16 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
 const updateSchema = z.object({
-    order: z.number().optional(),
+    order: z.number().nonnegative().optional(),
     nbReps: z.array(z.number().int().positive()).optional(),
-    weight: z.array(z.number().int().positive()).optional(),
-    restTime: z.number().int().positive().optional()
-});
+    weight: z.array(z.number().positive()).optional(),
+    restTime: z.number().int().nonnegative().optional(),
+    supersetId: z.string().uuid().nullable().optional(),
+})
+// .refine(data =>
+//     (!data.nbReps || !data.weight || data.nbReps.length === data.weight.length),
+//     { message: "nbReps et weight doivent avoir la même longueur", path: ["nbReps", "weight"] }
+// );
 
 export const PUT = async (
     req: NextRequest,

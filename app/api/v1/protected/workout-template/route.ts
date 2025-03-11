@@ -67,3 +67,29 @@ export const GET = async (req: NextRequest) => {
         }, { status: 500 });
     }
 };
+
+export const POST = async (req: NextRequest) => {
+    const workoutTemplate = await req.json();
+    const userId = req.headers.get("x-user-id") as string //From middleware;
+
+    const newWorkoutTemplate = prisma.workoutTemplate.create({
+        data: {
+            ...workoutTemplate,
+            ownerId: userId
+        }
+    })
+
+    if (!newWorkoutTemplate) {
+        return NextResponse.json({
+            message: 'Failed to create workout template',
+            data: [],
+            success: false,
+        }, { status: 500 });
+    }
+
+    return NextResponse.json({
+        message: 'Successfully created workout template',
+        data: newWorkoutTemplate,
+        success: true,
+    }, { status: 200 });
+}

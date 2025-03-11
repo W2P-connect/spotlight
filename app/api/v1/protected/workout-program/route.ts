@@ -48,3 +48,29 @@ export const GET = async (req: NextRequest) => {
         }, { status: 500 });
     }
 };
+
+export const POST = async (req: NextRequest) => {
+    const workoutProgram = await req.json();
+    const userId = req.headers.get("x-user-id") as string //From middleware;
+
+    const newWorkoutProgram = prisma.workoutProgram.create({
+        data: {
+            ...workoutProgram,
+            ownerId: userId
+        }
+    })
+
+    if (!newWorkoutProgram) {
+        return NextResponse.json({
+            message: 'Failed to create workout program',
+            data: [],
+            success: false,
+        }, { status: 500 });
+    }
+
+    return NextResponse.json({
+        message: 'Successfully created workout program',
+        data: newWorkoutProgram,
+        success: true,
+    }, { status: 200 });
+}

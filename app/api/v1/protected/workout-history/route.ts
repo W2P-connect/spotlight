@@ -35,7 +35,10 @@ export const GET = async (req: NextRequest) => {
         const workoutHistory = await prisma?.workoutHistory.findMany({
             where: whereClause,
             include: {
-                exercises: { include: { exercise: true } },
+                exercises: {
+                    include: { exercise: true },
+                    orderBy: { order: 'asc' }
+                },
             },
             orderBy: {
                 date: sortOrder === 'newest' ? 'desc' : 'asc'
