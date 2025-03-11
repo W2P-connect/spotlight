@@ -72,7 +72,7 @@ export const POST = async (req: NextRequest) => {
     const workoutTemplate = await req.json();
     const userId = req.headers.get("x-user-id") as string //From middleware;
 
-    const newWorkoutTemplate = prisma.workoutTemplate.create({
+    const newWorkoutTemplate = await prisma.workoutTemplate.create({
         data: {
             ...workoutTemplate,
             ownerId: userId

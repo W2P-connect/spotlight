@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { z } from "zod";
 
 export const GET = async (req: NextRequest) => {
     try {
@@ -49,28 +50,28 @@ export const GET = async (req: NextRequest) => {
     }
 };
 
+
 export const POST = async (req: NextRequest) => {
-    const workoutProgram = await req.json();
-    const userId = req.headers.get("x-user-id") as string //From middleware;
+    try {
+        const workoutProgram = await req.json();
+        const userId = req.headers.get("x-user-id") as string;
 
-    const newWorkoutProgram = prisma.workoutProgram.create({
-        data: {
-            ...workoutProgram,
-            ownerId: userId
-        }
-    })
+        const newWorkoutProgram = await prisma.workoutProgram.create({
+            data: { ...workoutProgram, ownerId: userId },
+        });
 
-    if (!newWorkoutProgram) {
         return NextResponse.json({
-            message: 'Failed to create workout program',
+            message: "Successfully created workout program",
+            data: newWorkoutProgram,
+            success: true,
+        }, { status: 200 });
+
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({
+            message: "Failed to create workout program",
             data: [],
             success: false,
         }, { status: 500 });
     }
-
-    return NextResponse.json({
-        message: 'Successfully created workout program',
-        data: newWorkoutProgram,
-        success: true,
-    }, { status: 200 });
-}
+};
