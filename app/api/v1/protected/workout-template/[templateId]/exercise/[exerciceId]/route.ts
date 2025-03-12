@@ -7,7 +7,7 @@ import { z } from 'zod';
 const updateSchema = z.object({
     minReps: z.array(z.number().int().positive()),
     maxReps: z.array(z.number().int().positive()),
-    restTime: z.number().int().positive().nullable().optional(),
+    restTime: z.array(z.number().int().positive()).optional(),
     order: z.number().int().positive().default(1),
     supersetId: z.string().uuid().nullable().optional(),
 });

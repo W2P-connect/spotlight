@@ -113,7 +113,7 @@ model WorkoutHistoryExercise {
   exerciseId       String  @db.Uuid
   nbReps           Int[]
   weight           Int[]
-  restTime         Int?
+  restTime         Int[]
   order            Int     @default(1)
   supersetId       String? @db.Uuid
 
@@ -133,7 +133,7 @@ model WorkoutTemplateExercise {
   exerciseId        String  @db.Uuid
   minReps           Int[] // Fourchette min par série
   maxReps           Int[] // Fourchette max par série
-  restTime          Int? // Temps de repos en secondes
+  restTime          Int[] // Temps de repos en secondes
   order             Int     @default(1)
   supersetId        String? @db.Uuid
 
