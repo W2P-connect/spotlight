@@ -7,8 +7,8 @@ import { z } from 'zod';
 const updateSchema = z.object({
     minReps: z.array(z.number().int().positive()),
     maxReps: z.array(z.number().int().positive()),
-    restTime: z.array(z.number().int().positive()).optional(),
-    order: z.number().int().positive().default(1),
+    restTime: z.array(z.number().int().nonnegative()).optional(),
+    order: z.number().int().nonnegative().default(1),
     supersetId: z.string().uuid().nullable().optional(),
 });
 
@@ -17,6 +17,7 @@ export const PUT = async (
     { params }: { params: Promise<{ templateId: string, exerciceId: string }> }
 ) => {
     try {
+
         const userId = req.headers.get("x-user-id") as string //From middleware;
         const { templateId, exerciceId } = await params;
 
@@ -26,13 +27,13 @@ export const PUT = async (
         const parsedBody = updateSchema.safeParse(body);
 
         if (!parsedBody.success) {
+            console.log(parsedBody.error.format());
             return NextResponse.json({
                 message: 'Invalid request body',
                 errors: parsedBody.error.format(),
                 success: false,
             }, { status: 400 });
         }
-
         try {
             const exercice = await prisma.workoutTemplateExercise.update({
                 where: {
