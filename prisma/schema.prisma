@@ -101,7 +101,7 @@ model WorkoutProgramWorkoutTemplate {
   updatedAt DateTime @default(now()) @updatedAt
 
   workoutProgram  WorkoutProgram  @relation(fields: [workoutProgramId], references: [id])
-  workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id])
+  workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
 
   @@unique([workoutProgramId, workoutTemplateId])
   @@map("workout_program_workout_template")
@@ -140,7 +140,7 @@ model WorkoutTemplateExercise {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id])
+  workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
   exercise        Exercise        @relation(fields: [exerciseId], references: [id])
 
   @@unique([workoutTemplateId, exerciseId])
