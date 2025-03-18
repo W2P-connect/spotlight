@@ -1,56 +1,9 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse, NextRequest } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { z } from "zod";
-import { Prisma } from '@prisma/client';
-import { log } from 'console';
-
-export const GET = async (req: NextRequest) => {
-    try {
-        const userId = req.headers.get("x-user-id") as string //From middleware;
-
-
-        const whereClause: any = {
-            ownerId: userId
-        };
-
-        const workoutPrograms = await prisma.workoutProgram.findMany({
-            where: whereClause,
-            include: {
-                workoutTemplateLinks: {
-                    orderBy: {
-                        order: 'asc'
-                    }
-                },
-                workoutHistory: true
-            },
-        })
-
-        if (!workoutPrograms) {
-            return NextResponse.json({
-                message: 'No Workout Programs found',
-                data: [],
-                success: false,
-            }, { status: 404 });
-        }
-
-        return NextResponse.json({
-            message: 'Successfully retrieved workout programs',
-            data: workoutPrograms,
-            success: true,
-        }, { status: 200 });
-
-    } catch (err: TypeError | any) {
-        console.error(err);
-        return NextResponse.json({
-            message: err.message ?? 'Unknown Error',
-            data: [],
-            error: err,
-            success: false,
-        }, { status: 500 });
-    }
-};
+import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
 export const POST = async (req: NextRequest) => {
     try {
@@ -58,17 +11,15 @@ export const POST = async (req: NextRequest) => {
             id: z.string().uuid().optional(),
             workoutProgramId: z.string().uuid(),
             workoutTemplateId: z.string().uuid(),
-            order: z.number().int().positive().default(1),
+            order: z.number().int().nonnegative().default(1),
             createdAt: z.coerce.date().optional(),
             updatedAt: z.coerce.date().optional(),
-            ownerId: z.string().optional(),
         });
 
         // Vérification du corps de la requête avec Zod
         const body = await req.json();
         const parsedData = workoutTemplateLinkSchema.safeParse(body);
 
-        log(parsedData);
         if (!parsedData.success) {
             return NextResponse.json({
                 message: 'Invalid request body',
@@ -130,7 +81,7 @@ export const POST = async (req: NextRequest) => {
         }
 
         return NextResponse.json({
-            message: "Failed to create workout program",
+            message: "Failed to link template",
             success: false,
         }, { status: 500 });
     }

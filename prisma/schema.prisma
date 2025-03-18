@@ -100,7 +100,7 @@ model WorkoutProgramWorkoutTemplate {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  workoutProgram  WorkoutProgram  @relation(fields: [workoutProgramId], references: [id])
+  workoutProgram  WorkoutProgram  @relation(fields: [workoutProgramId], references: [id], onDelete: Cascade)
   workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
 
   @@unique([workoutProgramId, workoutTemplateId])
