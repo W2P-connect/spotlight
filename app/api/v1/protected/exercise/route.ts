@@ -10,7 +10,10 @@ export const GET = async (req: NextRequest) => {
 
         const exercises = await prisma?.exercise.findMany({
             where: {
-                ownerId: userId || null
+                OR: [
+                    { ownerId: userId },  // Exercices de l'utilisateur
+                    { isPublic: true }     // Exercices publics
+                ]
             },
             orderBy: {
                 createdAt: 'desc'
