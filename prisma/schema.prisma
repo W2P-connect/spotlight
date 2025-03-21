@@ -63,6 +63,7 @@ model WorkoutHistory {
   ownerId           String   @db.Uuid
   workoutTemplateId String?  @db.Uuid
   workoutProgramId  String?  @db.Uuid // Ajout de la référence au programme
+  name              String   @default("Séance libre")
   comment           String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
