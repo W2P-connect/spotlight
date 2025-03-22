@@ -3,17 +3,9 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from "zod";
-import { Prisma, WorkoutHistoryExercise } from '@prisma/client';
-import { workoutHistoryExerciseSchema } from '../history-exercise/route';
+import { Prisma } from '@prisma/client';
+import { workoutHistoryExerciseSchema, workoutHistorySchema } from '@/lib/zod/history';
 
-const workoutHistorySchema = z.object({
-    date: z.string().datetime().optional(),
-    ownerId: z.string().uuid(),
-    workoutTemplateId: z.string().uuid().nullable().optional(),
-    workoutProgramId: z.string().uuid().nullable().optional().or(z.literal("")),
-    name: z.string().default("Séance libre"),
-    comment: z.string().nullable().optional(),
-}).strip();
 
 export const GET = async (req: NextRequest) => {
     try {
@@ -98,7 +90,7 @@ export const POST = async (req: NextRequest) => {
             data: {
                 ...validatedWorkout,
                 exercises: {
-                    create: validatedExercises.map(({workoutHistoryId, ...exercise}) => ({
+                    create: validatedExercises.map(({ workoutHistoryId, ...exercise }) => ({
                         ...exercise
                     }))
                 }
