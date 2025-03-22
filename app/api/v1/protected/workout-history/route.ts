@@ -2,6 +2,18 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { z } from "zod";
+import { Prisma, WorkoutHistoryExercise } from '@prisma/client';
+import { workoutHistoryExerciseSchema } from '../history-exercise/route';
+
+const workoutHistorySchema = z.object({
+    date: z.string().datetime().optional(),
+    ownerId: z.string().uuid(),
+    workoutTemplateId: z.string().uuid().nullable().optional(),
+    workoutProgramId: z.string().uuid().nullable().optional().or(z.literal("")),
+    name: z.string().default("Séance libre"),
+    comment: z.string().nullable().optional(),
+}).strip();
 
 export const GET = async (req: NextRequest) => {
     try {
@@ -62,6 +74,66 @@ export const GET = async (req: NextRequest) => {
         return NextResponse.json({
             message: 'Failed to retrieve workout history',
             data: [],
+            success: false,
+        }, { status: 500 });
+    }
+};
+
+
+export const POST = async (req: NextRequest) => {
+    try {
+        const body = await req.json();
+        const userId = req.headers.get("x-user-id") as string;
+
+        // Validation et nettoyage des données
+        const validatedWorkout = workoutHistorySchema.parse({ ...body, ownerId: userId });
+
+        const validatedExercises = z.array(workoutHistoryExerciseSchema).parse(body.exercises || []);
+
+        console.log("--------> validatedExercises", validatedExercises);
+
+
+        // Création du lien entre le programme et la séance
+        const newWorkoutHistory = await prisma.workoutHistory.create({
+            data: {
+                ...validatedWorkout,
+                exercises: {
+                    create: validatedExercises.map(({workoutHistoryId, ...exercise}) => ({
+                        ...exercise
+                    }))
+                }
+            },
+            include: {
+                exercises: true
+            }
+        });
+
+        return NextResponse.json({
+            message: "Successfully created workout history",
+            data: newWorkoutHistory,
+            success: true,
+        }, { status: 201 });
+
+    } catch (error) {
+        // console.error(error);
+
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({
+                message: "Validation error",
+                errors: error.format(),
+                success: false,
+            }, { status: 400 });
+        }
+
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            return NextResponse.json({
+                message: `Database error: ${error.message}`,
+                success: false,
+            }, { status: 500 });
+        }
+
+        return NextResponse.json({
+            message: "Failed to create workout history",
             success: false,
         }, { status: 500 });
     }
