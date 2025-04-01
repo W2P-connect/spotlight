@@ -135,7 +135,7 @@ model WorkoutTemplateExercise {
   id                String  @id @default(uuid()) @db.Uuid
   workoutTemplateId String  @db.Uuid
   exerciseId        String  @db.Uuid
-  commment          String  @default("")
+  comment           String  @default("")
   minReps           Int[] // Fourchette min par série
   maxReps           Int[] // Fourchette max par série
   restTime          Int[] // Temps de repos en secondes
