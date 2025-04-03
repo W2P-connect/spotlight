@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { comment } from 'postcss';
 
 const updateSchema = z.object({
     minReps: z.array(z.number().int().positive()),
@@ -10,6 +11,7 @@ const updateSchema = z.object({
     restTime: z.array(z.number().int().nonnegative()).optional(),
     order: z.number().int().nonnegative().default(1),
     supersetId: z.string().uuid().nullable().optional(),
+    comment: z.string().optional(),
 });
 
 export const PUT = async (
