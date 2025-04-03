@@ -90,9 +90,10 @@ export const POST = async (req: NextRequest) => {
             data: {
                 ...validatedWorkout,
                 exercises: {
-                    create: validatedExercises.map(({ workoutHistoryId, ...exercise }) => ({
-                        ...exercise
-                    }))
+                    create: validatedExercises.map((exercise) => {
+                        const { id, workoutHistoryId, ...rest } = exercise; //Prisma se charge de remettre l'id lui même
+                        return rest;
+                    })
                 }
             },
             include: {
@@ -107,8 +108,8 @@ export const POST = async (req: NextRequest) => {
         }, { status: 201 });
 
     } catch (error) {
-        // console.error(error);
-
+        console.log("error", error);
+        
         if (error instanceof z.ZodError) {
             return NextResponse.json({
                 message: "Validation error",

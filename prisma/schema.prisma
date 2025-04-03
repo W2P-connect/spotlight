@@ -113,6 +113,7 @@ model WorkoutHistoryExercise {
   id               String  @id @default(uuid()) @db.Uuid
   workoutHistoryId String  @db.Uuid
   exerciseId       String  @db.Uuid
+  comment          String
   nbReps           Int[]
   weight           Int[]
   minReps          Int[] // Fourchette min par série

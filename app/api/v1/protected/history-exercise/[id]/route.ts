@@ -8,6 +8,7 @@ const updateSchema = z.object({
     order: z.number().nonnegative().optional(),
     nbReps: z.array(z.number().int().positive()).optional(),
     weight: z.array(z.number().positive()).optional(),
+    comment: z.string().nullable().optional(),
     restTime: z.array(z.number().int().nonnegative()).optional(),
     supersetId: z.string().uuid().nullable().optional(),
 })
