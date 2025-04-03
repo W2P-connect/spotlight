@@ -4,13 +4,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from "zod";
 import { Prisma } from '@prisma/client';
-import { log } from 'console';
 
 export const GET = async (req: NextRequest) => {
     try {
         const userId = req.headers.get("x-user-id") as string //From middleware;
-
-
         const whereClause: any = {
             ownerId: userId
         };
@@ -56,20 +53,18 @@ export const POST = async (req: NextRequest) => {
     try {
         const workoutTemplateLinkSchema = z.object({
             id: z.string().uuid().optional(),
-            workoutProgramId: z.string().uuid(),
-            workoutTemplateId: z.string().uuid(),
-            order: z.number().int().positive().default(1),
             createdAt: z.coerce.date().optional(),
             updatedAt: z.coerce.date().optional(),
-            ownerId: z.string().optional(),
+            ownerId: z.string().uuid(),
+            name: z.string(),
         });
 
         // Vérification du corps de la requête avec Zod
         const body = await req.json();
         const parsedData = workoutTemplateLinkSchema.safeParse(body);
 
-        log(parsedData);
         if (!parsedData.success) {
+            console.log(parsedData.error);
             return NextResponse.json({
                 message: 'Invalid request body',
                 errors: parsedData.error.format(),
@@ -77,45 +72,22 @@ export const POST = async (req: NextRequest) => {
             }, { status: 400 });
         }
 
-        const userId = req.headers.get("x-user-id");
-        if (!userId) {
+        const userId = req.headers.get("x-user-id") as string;
+
+        if(userId !== parsedData.data.ownerId) {
             return NextResponse.json({
-                message: "Missing 'x-user-id' header",
+                message: "Wrong user-id header",
                 success: false,
-            }, { status: 400 });
+            }, { status: 401 });
         }
 
-        const [program, template] = await Promise.all([
-            await prisma.workoutProgram.findFirst({
-                where: {
-                    id: parsedData.data.workoutProgramId,
-                    ownerId: userId
-                }
-            }),
-            await prisma.workoutTemplate.findFirst({
-                where: {
-                    id: parsedData.data.workoutTemplateId,
-                    ownerId: userId
-                }
-            })
-        ])
-
-        if (!program || !template) {
-            return NextResponse.json({
-                message: "Not authorized",
-                errors: {},
-                success: false,
-            }, { status: 400 });
-        }
-
-        // Création du lien entre le programme et la séance
-        const newWorkoutTemplateLink = await prisma.workoutProgramWorkoutTemplate.create({
+        const newWorkoutProgram = await prisma.workoutProgram.create({
             data: parsedData.data
         });
 
         return NextResponse.json({
             message: "Successfully created workout program",
-            data: newWorkoutTemplateLink,
+            data: newWorkoutProgram,
             success: true,
         }, { status: 201 });
 

@@ -51,3 +51,53 @@ export const DELETE = async (
         }, { status: 500 });
     }
 }
+
+export const PUT = async (
+    req: NextRequest,
+    { params }: { params: Promise<{ programId: string }> }
+) => {
+    try {
+        const userId = req.headers.get("x-user-id") as string;
+
+        const { programId } = await params;
+        if (!programId) return;
+
+        const body = await req.json();
+
+        try {
+            await prisma.workoutProgram.update({
+                where: {
+                    ownerId: userId,
+                    id: programId
+                },
+                data: {
+                    name: body.name,
+                    startDate: body.startDate ? new Date(body.startDate) : undefined,
+                    endDate: body.endDate ? new Date(body.endDate) : undefined
+                }
+            });
+
+            return NextResponse.json({
+                message: 'Successfully updated workout program',
+                data: [],
+                success: true,
+            }, { status: 200 });
+
+        } catch (error: any) {
+            if (error.code === 'P2025') {
+                return NextResponse.json({
+                    message: 'Workout program not found',
+                    success: false,
+                }, { status: 404 });
+            }
+            throw error;
+        }
+
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        return NextResponse.json({
+            message: 'An unexpected error occurred',
+            success: false,
+        }, { status: 500 });
+    }
+};

@@ -36,8 +36,6 @@ export const PUT = async (
             }, { status: 400 });
         }
 
-        console.log("NEWLINK", parsedBody.data);
-
         const program = await prisma.workoutProgram.findUnique({
             where: {
                 id: programId,

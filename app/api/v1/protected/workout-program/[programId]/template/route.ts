@@ -16,11 +16,13 @@ export const POST = async (req: NextRequest) => {
             updatedAt: z.coerce.date().optional(),
         });
 
-        // Vérification du corps de la requête avec Zod
+        const userId = req.headers.get("x-user-id") as string;
+
         const body = await req.json();
         const parsedData = workoutTemplateLinkSchema.safeParse(body);
 
         if (!parsedData.success) {
+            console.error(parsedData.error);
             return NextResponse.json({
                 message: 'Invalid request body',
                 errors: parsedData.error.format(),
@@ -28,13 +30,6 @@ export const POST = async (req: NextRequest) => {
             }, { status: 400 });
         }
 
-        const userId = req.headers.get("x-user-id");
-        if (!userId) {
-            return NextResponse.json({
-                message: "Missing 'x-user-id' header",
-                success: false,
-            }, { status: 400 });
-        }
 
         const [program, template] = await Promise.all([
             await prisma.workoutProgram.findFirst({
@@ -52,6 +47,7 @@ export const POST = async (req: NextRequest) => {
         ])
 
         if (!program || !template) {
+            console.error("Program or template not found");
             return NextResponse.json({
                 message: "Not authorized",
                 errors: {},
