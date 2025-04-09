@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { log } from 'console';
 
 const updateSchema = z.object({
     order: z.number().nonnegative().optional(),
@@ -32,8 +33,6 @@ export const PUT = async (
         const parsedBody = updateSchema.safeParse(body);
 
         if (!parsedBody.success) {
-            console.log(parsedBody.error.issues);
-
             return NextResponse.json({
                 message: 'Invalid request body',
                 errors: parsedBody.error.format(),

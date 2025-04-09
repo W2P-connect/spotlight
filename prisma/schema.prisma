@@ -77,11 +77,11 @@ model WorkoutHistory {
 }
 
 model Exercise {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String
-  isPublic     Boolean  @default(false)
-  ownerId      String?  @db.Uuid // Null si c'est un exercice public
-  tags         String[] @default([])
+  id       String   @id @default(uuid()) @db.Uuid
+  name     String
+  isPublic Boolean  @default(false)
+  ownerId  String?  @db.Uuid // Null si c'est un exercice public
+  tags     String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -89,7 +89,7 @@ model Exercise {
   owner            Profile?                  @relation(fields: [ownerId], references: [id])
   workoutTemplates WorkoutTemplateExercise[]
   workoutHistories WorkoutHistoryExercise[]
-  muscles          Muscle[] 
+  muscles          Muscle[]
 
   @@map("exercise")
 }
@@ -155,20 +155,20 @@ model WorkoutTemplateExercise {
 }
 
 model Muscle {
-  id       String   @id @default(uuid()) @db.Uuid
-  name     String
-  muscleGroupId String  @db.Uuid
+  id            String @id @default(uuid()) @db.Uuid
+  name          String
+  muscleGroupId String @db.Uuid
 
-  muscleGroup    MuscleGroup @relation(fields: [muscleGroupId], references: [id])
-  exercises     Exercise[]
+  muscleGroup MuscleGroup @relation(fields: [muscleGroupId], references: [id])
+  exercises   Exercise[]
 
-    @@map("muscle")
+  @@map("muscle")
 }
 
 model MuscleGroup {
-  id       String   @id @default(uuid()) @db.Uuid
-  name     String
-  muscles   Muscle[]
+  id      String   @id @default(uuid()) @db.Uuid
+  name    String
+  muscles Muscle[]
 
   @@map("muscle_group")
 }
