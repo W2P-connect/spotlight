@@ -153,6 +153,20 @@ model WorkoutTemplateExercise {
   @@map("workout_template_exercise")
 }
 
+model Muscle {
+  id       String   @id @default(uuid()) @db.Uuid
+  name     String
+  muscleGroupId String  @db.Uuid
+
+  muscleGroup    MuscleGroup @relation(fields: [muscleGroupId], references: [id])
+}
+
+model MuscleGroup {
+  id       String   @id @default(uuid()) @db.Uuid
+  name     String
+  muscles   Muscle[]
+}
+
 enum Role {
   admin
   user
