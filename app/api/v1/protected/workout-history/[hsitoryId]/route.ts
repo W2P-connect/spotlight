@@ -4,28 +4,22 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 
-const updateSchema = z.object({
-    order: z.number().nonnegative().optional(),
-    nbReps: z.array(z.number().int().positive()).optional(),
-    weight: z.array(z.number().positive()).optional(),
+const updateWorkoutHistorySchema = z.object({
+    name: z.string().min(1).optional(),
     comment: z.string().nullable().optional(),
-    restTime: z.array(z.number().int().nonnegative()).optional(),
-    supersetId: z.string().uuid().nullable().optional(),
-})
-// .refine(data =>
-//     (!data.nbReps || !data.weight || data.nbReps.length === data.weight.length),
-//     { message: "nbReps et weight doivent avoir la même longueur", path: ["nbReps", "weight"] }
-// );
+    workoutTemplateId: z.string().uuid().nullable().optional(),
+    workoutProgramId: z.string().uuid().nullable().optional(),
+});
 
 export const PUT = async (
     req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ hsitoryId: string }> }
 ) => {
     try {
-        const userId = req.headers.get("x-user-id") as string //From middleware;
+        const userId = req.headers.get("x-user-id") as string;
 
-        const { id } = await params;
-        if (!id) {
+        const { hsitoryId } = await params;
+        if (!hsitoryId) {
             return NextResponse.json({
                 message: 'Missing required parameter: id',
                 success: false,
@@ -33,38 +27,35 @@ export const PUT = async (
         }
 
         const body = await req.json();
-        const parsedBody = updateSchema.safeParse(body);
+        const parsedBody = updateWorkoutHistorySchema.safeParse(body);
 
         if (!parsedBody.success) {
             console.log(parsedBody.error.issues);
-
             return NextResponse.json({
                 message: 'Invalid request body',
                 errors: parsedBody.error.format(),
                 success: false,
             }, { status: 400 });
         }
+
         try {
-            const workoutHistoryExercise = await prisma.workoutHistoryExercise.update({
+            const workoutHistory = await prisma.workoutHistory.update({
                 where: {
-                    id: id,
-                    workoutHistory: {
-                        ownerId: userId
-                    }
+                    id: hsitoryId,
+                    ownerId: userId,
                 },
-                data: parsedBody.data
+                data: parsedBody.data,
             });
 
             return NextResponse.json({
-                message: 'Successfully updated workout history exercise',
-                data: workoutHistoryExercise,
+                message: 'Successfully updated workout history',
+                data: workoutHistory,
                 success: true,
             }, { status: 200 });
-
         } catch (error: any) {
             if (error.code === 'P2025') {
                 return NextResponse.json({
-                    message: 'Workout exercise not found or does not belong to the user',
+                    message: 'Workout history not found or does not belong to the user',
                     success: false,
                 }, { status: 404 });
             }
