@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { workoutHistoryExerciseSchema } from '@/lib/zod/history';
+import { log } from 'console';
 
 export const POST = async (req: NextRequest) => {
     try {
@@ -40,8 +41,6 @@ export const POST = async (req: NextRequest) => {
         }, { status: 201 });
 
     } catch (error) {
-        console.error(error);
-
         if (error instanceof z.ZodError) {
             return NextResponse.json({
                 message: "Validation error",
@@ -51,6 +50,7 @@ export const POST = async (req: NextRequest) => {
         }
 
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            console.log(error.message);
             return NextResponse.json({
                 message: `Database error: ${error.message}`,
                 success: false,

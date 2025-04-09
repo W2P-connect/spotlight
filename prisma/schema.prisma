@@ -77,11 +77,13 @@ model WorkoutHistory {
 }
 
 model Exercise {
-  id       String   @id @default(uuid()) @db.Uuid
-  name     String
-  isPublic Boolean  @default(false)
-  ownerId  String?  @db.Uuid // Null si c'est un exercice public
-  tags     String[] @default([])
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  isPublic     Boolean  @default(false)
+  ownerId      String?  @db.Uuid // Null si c'est un exercice public
+  tags         String[] @default([])
+  muscleGroup  String[] @default([])
+  muscleDetail String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
