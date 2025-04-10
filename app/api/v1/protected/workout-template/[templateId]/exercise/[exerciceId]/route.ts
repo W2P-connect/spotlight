@@ -11,6 +11,7 @@ const updateSchema = z.object({
     restTime: z.array(z.number().int().nonnegative()).optional(),
     order: z.number().int().nonnegative().default(1),
     supersetId: z.string().uuid().nullable().optional(),
+    exerciseId: z.string().uuid().optional(),
     comment: z.string().optional(),
 });
 
