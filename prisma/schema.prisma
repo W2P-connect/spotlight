@@ -65,6 +65,8 @@ model WorkoutHistory {
   workoutProgramId  String?  @db.Uuid // Ajout de la référence au programme
   name              String   @default("Séance libre")
   comment           String?
+  visibility        Boolean  @default(false)
+  workout_place     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
 
