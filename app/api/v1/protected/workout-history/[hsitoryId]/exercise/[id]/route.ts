@@ -33,6 +33,8 @@ export const PUT = async (
         const body = await req.json();
         const parsedBody = updateSchema.safeParse(body);
 
+        console.log("parsedBody.data", parsedBody.data);
+
         if (!parsedBody.success) {
             return NextResponse.json({
                 message: 'Invalid request body',
