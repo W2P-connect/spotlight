@@ -12,6 +12,7 @@ const updateSchema = z.object({
     comment: z.string().nullable().optional(),
     restTime: z.array(z.number().int().nonnegative()).optional(),
     supersetId: z.string().uuid().nullable().optional(),
+    exerciceId: z.string().uuid().optional(),
 })
 
 export const PUT = async (
