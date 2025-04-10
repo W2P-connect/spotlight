@@ -11,7 +11,7 @@ const updateSchema = z.object({
     comment: z.string().nullable().optional(),
     restTime: z.array(z.number().int().nonnegative()).optional(),
     supersetId: z.string().uuid().nullable().optional(),
-    exerciceId: z.string().uuid().optional(),
+    exerciseId: z.string().uuid().optional(),
 })
 
 export const PUT = async (
@@ -32,7 +32,6 @@ export const PUT = async (
         const body = await req.json();
         const parsedBody = updateSchema.safeParse(body);
 
-        console.log("body", body);
         console.log("parsedBody.data", parsedBody.data);
 
         if (!parsedBody.success) {
