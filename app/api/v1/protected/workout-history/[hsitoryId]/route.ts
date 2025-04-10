@@ -70,3 +70,50 @@ export const PUT = async (
         }, { status: 500 });
     }
 };
+
+export const DELETE = async (
+    req: NextRequest,
+    { params }: { params: Promise<{ hsitoryId: string }> }
+  ) => {
+    try {
+      const userId = req.headers.get("x-user-id") as string;
+  
+      const { hsitoryId } = await params;
+  
+      try {
+        const deleted = await prisma.workoutHistory.deleteMany({
+          where: {
+            id: hsitoryId,
+            ownerId: userId,
+          },
+        });
+  
+        if (deleted.count === 0) {
+          return NextResponse.json({
+            message: 'Workout history not found or does not belong to the user',
+            success: false,
+          }, { status: 404 });
+        }
+  
+        return NextResponse.json({
+          message: 'Successfully deleted workout history',
+          success: true,
+        }, { status: 200 });
+  
+      } catch (error: any) {
+        console.error('Prisma error:', error);
+        return NextResponse.json({
+          message: 'Failed to delete workout history',
+          success: false,
+        }, { status: 500 });
+      }
+  
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      return NextResponse.json({
+        message: 'An unexpected error occurred',
+        success: false,
+      }, { status: 500 });
+    }
+  };
+  
