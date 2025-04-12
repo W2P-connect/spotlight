@@ -67,6 +67,7 @@ model WorkoutHistory {
   comment           String?
   isPublic          Boolean  @default(false)
   workoutPlace      String?
+  duration          Int?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
 

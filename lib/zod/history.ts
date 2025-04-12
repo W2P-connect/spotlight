@@ -21,5 +21,6 @@ export const workoutHistorySchema = z.object({
     workoutTemplateId: z.string().uuid().nullable().optional(),
     workoutProgramId: z.string().uuid().nullable().optional().or(z.literal("")),
     name: z.string().default("Séance libre"),
+    duration: z.number().int().nonnegative().default(0),
     comment: z.string().nullable().optional(),
 }).strip();
