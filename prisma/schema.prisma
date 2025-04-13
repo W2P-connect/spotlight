@@ -129,7 +129,7 @@ model WorkoutHistoryExercise {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  workoutHistory WorkoutHistory @relation(fields: [workoutHistoryId], references: [id])
+  workoutHistory WorkoutHistory @relation(fields: [workoutHistoryId], references: [id], onDelete: Cascade)
   exercise       Exercise       @relation(fields: [exerciseId], references: [id])
 
   @@unique([workoutHistoryId, exerciseId])

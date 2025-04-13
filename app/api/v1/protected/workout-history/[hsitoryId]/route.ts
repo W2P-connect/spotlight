@@ -81,14 +81,14 @@ export const DELETE = async (
       const { hsitoryId } = await params;
   
       try {
-        const deleted = await prisma.workoutHistory.deleteMany({
+        const deleted = await prisma.workoutHistory.delete({
           where: {
             id: hsitoryId,
             ownerId: userId,
           },
         });
   
-        if (deleted.count === 0) {
+        if (!deleted) {
           return NextResponse.json({
             message: 'Workout history not found or does not belong to the user',
             success: false,
