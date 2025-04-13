@@ -23,4 +23,6 @@ export const workoutHistorySchema = z.object({
     name: z.string().default("Séance libre"),
     duration: z.number().int().nonnegative().default(0),
     comment: z.string().nullable().optional(),
+    isPublic: z.boolean().default(false),
+    workoutPlace: z.string().nullable().optional(),
 }).strip();
