@@ -23,3 +23,23 @@ export type CallApiResponse<T = any> = {
     url: string;
     error: null;
 };
+
+
+/******************************* USER ****************************/
+export interface UserMetadata {
+    email?: string;
+    email_verified?: boolean;
+    phone_verified?: boolean;
+    sub?: string;
+    username?: string;
+    last_name?: string;
+    first_name?: string;
+    city?: string;
+    country?: string;
+    bio?: string;
+    gym_place?: string;
+    gender?: string;
+    main_sport?: string;
+    height?: string;
+    weight?: string;
+}
