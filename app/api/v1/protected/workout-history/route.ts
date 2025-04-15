@@ -27,9 +27,9 @@ export const GET = async (req: NextRequest) => {
         }
         if (workoutProgramId) {
             whereClause.workoutTemplate = {
-                workoutPrograms: {
+                workoutProgramLinks: {
                     some: {
-                        id: workoutProgramId
+                        workoutProgramId: workoutProgramId
                     }
                 }
             };
@@ -109,7 +109,7 @@ export const POST = async (req: NextRequest) => {
 
     } catch (error) {
         console.log("error", error);
-        
+
         if (error instanceof z.ZodError) {
             return NextResponse.json({
                 message: "Validation error",

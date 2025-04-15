@@ -16,4 +16,5 @@ export const userMetadataSchema = z.object({
     main_sport: z.string().optional(),
     height: z.string().optional(),
     weight: z.string().optional(),
+    profil_picture_uri: z.string().optional(),
 });

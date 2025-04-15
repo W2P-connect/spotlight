@@ -42,4 +42,5 @@ export interface UserMetadata {
     main_sport?: string;
     height?: string;
     weight?: string;
+    profil_picture_uri?: string;
 }
