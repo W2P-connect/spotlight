@@ -8,9 +8,9 @@ datasource db {
 }
 
 model Profile {
-  id       String  @id @default(uuid()) @db.Uuid
-  role     Role    @default(user)
-  fullName String? @map("full_name")
+  id          String  @id @default(uuid()) @db.Uuid
+  role        Role    @default(user)
+  searchValue String? @map("search_value")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

@@ -43,6 +43,26 @@ export const PUT = async (
             );
         }
 
+        const { first_name, last_name, username } = parsed.data;
+
+        const search_value = `${first_name ?? ''} ${last_name ?? ''} ${username ?? ''}`.toLowerCase().trim();
+
+        const { error: profileUpdateError } = await supabaseAdmin
+            .from('profile')
+            .update({ search_value })
+            .eq('id', userId);
+
+        if (profileUpdateError) {
+            return NextResponse.json(
+                {
+                    message: 'User metadata updated but failed to update search_value',
+                    error: profileUpdateError.message,
+                    success: false,
+                },
+                { status: 500 }
+            );
+        }
+
         return NextResponse.json(
             {
                 message: 'User metadata updated successfully',

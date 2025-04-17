@@ -4,6 +4,7 @@ export const userMetadataSchema = z.object({
     email: z.string().email().optional(),
     email_verified: z.boolean().optional(),
     phone_verified: z.boolean().optional(),
+    meta_loaded: z.boolean().optional(),
     sub: z.string().optional(),
     username: z.string().optional(),
     last_name: z.string().optional(),
