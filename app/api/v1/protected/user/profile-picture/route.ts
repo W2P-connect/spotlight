@@ -63,7 +63,24 @@ export const POST = async (req: NextRequest) => {
         }, { status: 500 });
     }
 
-    console.log(publicUrlWithBuster);
+    const { error: profileUpdateError } = await supabase
+        .from('profile')
+        .update({
+            profil_picture: publicUrlWithBuster
+        })
+        .eq('id', userId);
+
+    if (profileUpdateError) {
+        return NextResponse.json(
+            {
+                message: 'User profile picure update failed in table',
+                error: profileUpdateError.message,
+                success: false,
+            },
+            { status: 500 }
+        );
+    }
+
 
 
     return NextResponse.json({

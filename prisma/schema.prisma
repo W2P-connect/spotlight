@@ -8,9 +8,17 @@ datasource db {
 }
 
 model Profile {
-  id          String  @id @default(uuid()) @db.Uuid
-  role        Role    @default(user)
-  searchValue String? @map("search_value")
+  id             String  @id @default(uuid()) @db.Uuid
+  role           Role    @default(user)
+  searchValue    String? @map("search_value")
+  displayName    String? @map("display_name")
+  firstName      String? @map("first_name")
+  lastName       String? @map("last_name")
+  username       String?
+  profilPicture  String? @map("profil_picture")
+  
+  followersCount Int     @default(0)
+  followingCount Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -20,7 +28,24 @@ model Profile {
   exercises        Exercise[]
   WorkoutHistory   WorkoutHistory[]
 
+  // Relations Follow
+  following Follow[] @relation("UserFollowing")
+  followers Follow[] @relation("UserFollowers")
+
   @@map("profile")
+}
+
+model Follow {
+  id          String   @id @default(uuid()) @db.Uuid
+  followerId  String   @db.Uuid
+  followingId String   @db.Uuid
+  createdAt   DateTime @default(now())
+
+  follower  Profile @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following Profile @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId]) // Empêcher le double follow
+  @@map("follow")
 }
 
 model WorkoutProgram {

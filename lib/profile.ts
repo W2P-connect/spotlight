@@ -17,12 +17,25 @@ const getProfileData = async (userId: Profile["id"]) => {
 
     const profile = await prisma.profile.findUnique({
         where: { id: userId },
+        include: {
+            following: true,
+            followers: true,
+            WorkoutHistory: {
+                include: {
+                    exercises: { include: { exercise: true } }
+                },
+                where: { isPublic: true }
+            },
+        },
     });
 
     if (!profile) return null;
 
     return {
+        ...profile,
         ...user.user,
+        posts: profile.WorkoutHistory,
+        profilPicture: profile.profilPicture,
     };
 };
 
