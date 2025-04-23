@@ -65,3 +65,43 @@ export async function toggleLike(userId: string, postId: string) {
         };
     }
 }
+
+export async function createComment(userId: string, postId: string, content: string, parentId?: string) {
+    try {
+        const post = await prisma.workoutHistory.findUnique({ where: { id: postId } });
+        if (!post) {
+            return { message: "Post not found.", error: "PostNotFound", success: false };
+        }
+
+        if (parentId) {
+            const parentComment = await prisma.comment.findUnique({ where: { id: parentId } });
+            if (!parentComment || parentComment.postId !== postId) {
+                return { message: "Invalid parent comment.", error: "InvalidParent", success: false };
+            }
+        }
+
+        const comment = await prisma.comment.create({
+            data: {
+                userId,
+                postId,
+                content,
+                parentId: parentId || null
+            }
+        });
+
+        await prisma.workoutHistory.update({
+            where: { id: postId },
+            data: { commentsCount: { increment: 1 } }
+        });
+
+        return { message: "created", error: null, success: true, data: comment };
+
+    } catch (err: any) {
+        console.error("CreateComment Error:", err);
+        return {
+            message: "An error occurred while creating the comment.",
+            error: err.message || "Unknown error",
+            success: false
+        };
+    }
+}

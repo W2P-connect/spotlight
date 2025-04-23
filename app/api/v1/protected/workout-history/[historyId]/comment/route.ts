@@ -1,6 +1,6 @@
-import { createComment } from "@/lib/post/commentUtils";
 import { NextRequest } from "next/server";
 import { apiResponse } from "@/utils/apiResponse";
+import { createComment } from "@/lib/post/utils";
 
 export const POST = async (
     req: NextRequest,
