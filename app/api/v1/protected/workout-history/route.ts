@@ -15,13 +15,16 @@ export const GET = async (req: NextRequest) => {
         // Récupération des filtres
         const workoutTemplateId = searchParams.get('workoutTemplateId');
         const workoutProgramId = searchParams.get('workoutProgramId');
+        const onlyPublic = searchParams.get('onlyPublic');
         const sortOrder = searchParams.get('date') || 'newest'; // Par défaut "newest"
-
-        console.log(searchParams);
 
         const whereClause: any = {
             ownerId: userId
         };
+
+        if (onlyPublic) {
+            whereClause.isPublic = true;
+        }
         if (workoutTemplateId) {
             whereClause.workoutTemplateId = workoutTemplateId;
         }

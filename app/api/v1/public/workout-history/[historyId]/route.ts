@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { SupabaseClient } from '@supabase/supabase-js';
 import getProfileData from '@/lib/profile';
 
 export const GET = async (
@@ -54,7 +53,7 @@ export const GET = async (
         }, { status: 200 });
     } catch (err) {
         return NextResponse.json({
-            message: 'Failed to get exercises',
+            message: 'Failed to get history',
             data: [],
             success: false,
         }, { status: 500 });

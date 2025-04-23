@@ -8,17 +8,17 @@ datasource db {
 }
 
 model Profile {
-  id             String  @id @default(uuid()) @db.Uuid
-  role           Role    @default(user)
-  searchValue    String? @map("search_value")
-  displayName    String? @map("display_name")
-  firstName      String? @map("first_name")
-  lastName       String? @map("last_name")
-  username       String?
-  profilPicture  String? @map("profil_picture")
-  
-  followersCount Int     @default(0)
-  followingCount Int     @default(0)
+  id            String  @id @default(uuid()) @db.Uuid
+  role          Role    @default(user)
+  searchValue   String? @map("search_value")
+  displayName   String? @map("display_name")
+  firstName     String? @map("first_name")
+  lastName      String? @map("last_name")
+  username      String?
+  profilPicture String? @map("profil_picture")
+
+  followersCount Int @default(0)
+  followingCount Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -29,8 +29,10 @@ model Profile {
   WorkoutHistory   WorkoutHistory[]
 
   // Relations Follow
-  following Follow[] @relation("UserFollowing")
-  followers Follow[] @relation("UserFollowers")
+  following Follow[]  @relation("UserFollowing")
+  followers Follow[]  @relation("UserFollowers")
+  Like      Like[]
+  Comment   Comment[]
 
   @@map("profile")
 }
@@ -95,13 +97,48 @@ model WorkoutHistory {
   duration          Int?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
+  likesCount        Int      @default(0)
+  commentsCount     Int      @default(0)
 
   owner           Profile                  @relation(fields: [ownerId], references: [id])
   workoutTemplate WorkoutTemplate?         @relation(fields: [workoutTemplateId], references: [id])
   workoutProgram  WorkoutProgram?          @relation(fields: [workoutProgramId], references: [id]) // Relation avec le programme
   exercises       WorkoutHistoryExercise[]
+  Like            Like[]
+  Comment         Comment[]
 
   @@map("workout_history")
+}
+
+model Like {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  postId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post WorkoutHistory @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("like")
+}
+
+model Comment {
+  id        String   @id @default(uuid()) @db.Uuid
+  postId    String   @db.Uuid
+  userId    String   @db.Uuid
+  parentId  String?  @db.Uuid // Référence au commentaire parent (null si commentaire principal)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  // Relations
+  post    WorkoutHistory @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user    Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  Comment?       @relation("CommentReplies", fields: [parentId], references: [id])
+  replies Comment[]      @relation("CommentReplies")
+
+  @@map("comment")
 }
 
 model Exercise {

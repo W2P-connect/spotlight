@@ -113,7 +113,7 @@ export const GET = async (req: NextRequest) => {
     try {
         const { data, error } = await supabaseAdmin
             .from('profile')
-            .select('id, display_name, profil_picture') 
+            .select('id, display_name, profil_picture')
             .ilike('search_value', `%${query}%`)
             .limit(10);
 

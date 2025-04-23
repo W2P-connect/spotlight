@@ -10,7 +10,7 @@ export const GET = async (
     try {
         const { userId } = await params;
 
-        const profileData = await getProfileData(userId);
+        const profileData = await getProfileData(userId, true);
 
 
         if (!profileData) {
@@ -21,23 +21,9 @@ export const GET = async (
             }, { status: 404 });
         }
 
-        //On ne concerve que certaines données car c'est public !! (ne surtout pas inclure le mail)
-        const publicData = {
-            id: profileData.id,
-            profilPicture: profileData.profilPicture,
-            fisrtName: profileData.firstName,
-            lastName: profileData.lastName,
-            username: profileData.username,
-            following: profileData.following,
-            followers: profileData.followers,
-            followingCount: profileData.followingCount,
-            followersCount: profileData.followersCount,
-            posts: profileData.posts
-        }
-
         return NextResponse.json({
             message: 'Profile retrieved successfully',
-            data: publicData,
+            data: profileData,
             success: true,
         }, { status: 200 });
     } catch (err) {

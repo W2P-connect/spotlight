@@ -7,13 +7,13 @@ import { updateWorkoutHistorySchema } from '@/lib/zod/history';
 
 export const PUT = async (
   req: NextRequest,
-  { params }: { params: Promise<{ hsitoryId: string }> }
+  { params }: { params: Promise<{ historyId: string }> }
 ) => {
   try {
     const userId = req.headers.get("x-user-id") as string;
 
-    const { hsitoryId } = await params;
-    if (!hsitoryId) {
+    const { historyId } = await params;
+    if (!historyId) {
       return NextResponse.json({
         message: 'Missing required parameter: id',
         success: false,
@@ -35,7 +35,7 @@ export const PUT = async (
     try {
       const workoutHistory = await prisma.workoutHistory.update({
         where: {
-          id: hsitoryId,
+          id: historyId,
           ownerId: userId,
         },
         data: parsedBody.data,
@@ -67,17 +67,17 @@ export const PUT = async (
 
 export const DELETE = async (
   req: NextRequest,
-  { params }: { params: Promise<{ hsitoryId: string }> }
+  { params }: { params: Promise<{ historyId: string }> }
 ) => {
   try {
     const userId = req.headers.get("x-user-id") as string;
 
-    const { hsitoryId } = await params;
+    const { historyId } = await params;
 
     try {
       const deleted = await prisma.workoutHistory.delete({
         where: {
-          id: hsitoryId,
+          id: historyId,
           ownerId: userId,
         },
       });
