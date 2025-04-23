@@ -16,6 +16,7 @@ export const workoutHistoryExerciseSchema = z.object({
 }).strip();
 
 export const workoutHistorySchema = z.object({
+    id: z.string().uuid(),
     date: z.string().datetime().optional(),
     ownerId: z.string().uuid(),
     workoutTemplateId: z.string().uuid().nullable().optional(),

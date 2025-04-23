@@ -29,10 +29,11 @@ model Profile {
   WorkoutHistory   WorkoutHistory[]
 
   // Relations Follow
-  following Follow[]  @relation("UserFollowing")
-  followers Follow[]  @relation("UserFollowers")
-  Like      Like[]
-  Comment   Comment[]
+  following   Follow[]      @relation("UserFollowing")
+  followers   Follow[]      @relation("UserFollowers")
+  Like        Like[]
+  Comment     Comment[]
+  CommentLike CommentLike[]
 
   @@map("profile")
 }
@@ -123,20 +124,34 @@ model Like {
   @@map("like")
 }
 
-model Comment {
+model CommentLike {
   id        String   @id @default(uuid()) @db.Uuid
-  postId    String   @db.Uuid
   userId    String   @db.Uuid
-  parentId  String?  @db.Uuid // Référence au commentaire parent (null si commentaire principal)
-  content   String
+  commentId String   @db.Uuid
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
 
-  // Relations
+  user    Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@map("comment_like")
+}
+
+model Comment {
+  id         String   @id @default(uuid()) @db.Uuid
+  postId     String   @db.Uuid
+  userId     String   @db.Uuid
+  parentId   String?  @db.Uuid
+  content    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+  likesCount Int      @default(0) // Ajout du compteur de likes sur les commentaires
+
   post    WorkoutHistory @relation(fields: [postId], references: [id], onDelete: Cascade)
   user    Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent  Comment?       @relation("CommentReplies", fields: [parentId], references: [id])
   replies Comment[]      @relation("CommentReplies")
+  likes   CommentLike[]
 
   @@map("comment")
 }

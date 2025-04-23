@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import sanitizeHtml from 'sanitize-html';
 
 export async function toggleLike(userId: string, postId: string) {
     try {
@@ -80,19 +81,30 @@ export async function createComment(userId: string, postId: string, content: str
             }
         }
 
+        const cleanContent = sanitizeHtml(content, {
+            allowedTags: [],      // Aucun tag HTML autorisé
+            allowedAttributes: {} // Aucune attribut autorisé
+        });
+
+        if (!cleanContent) {
+            return { message: "Invalid comment content.", error: "InvalidContent", success: false };
+        }
+
         const comment = await prisma.comment.create({
             data: {
                 userId,
                 postId,
-                content,
+                content: cleanContent,
                 parentId: parentId || null
             }
         });
 
-        await prisma.workoutHistory.update({
-            where: { id: postId },
-            data: { commentsCount: { increment: 1 } }
-        });
+        if (!parentId) {
+            await prisma.workoutHistory.update({
+                where: { id: postId },
+                data: { commentsCount: { increment: 1 } }
+            });
+        }
 
         return { message: "created", error: null, success: true, data: comment };
 
@@ -100,6 +112,111 @@ export async function createComment(userId: string, postId: string, content: str
         console.error("CreateComment Error:", err);
         return {
             message: "An error occurred while creating the comment.",
+            error: err.message || "Unknown error",
+            success: false
+        };
+    }
+}
+
+export async function getComments(postId: string, limit: number = 10, offset: number = 0) {
+    try {
+        // Vérifier que le post existe
+        const post = await prisma.workoutHistory.findUnique({ where: { id: postId } });
+        if (!post) {
+            return { message: "Post not found.", error: "PostNotFound", success: false };
+        }
+
+        // Récupérer les commentaires principaux avec leurs réponses
+        const comments = await prisma.comment.findMany({
+            where: {
+                postId,
+                parentId: null
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        username: true,
+                        displayName: true,
+                        profilPicture: true
+                    }
+                },
+                replies: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                username: true,
+                                displayName: true,
+                                profilPicture: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: 'desc' },  // Ou 'asc' si tu préfères
+            take: limit,
+            skip: offset
+        });
+
+        return { message: "Fetched", error: null, success: true, data: comments };
+
+    } catch (err: any) {
+        console.error("GetComments Error:", err);
+        return {
+            message: "An error occurred while fetching comments.",
+            error: err.message || "Unknown error",
+            success: false
+        };
+    }
+}
+
+export async function toggleCommentLike(userId: string, commentId: string) {
+    try {
+        const existingLike = await prisma.commentLike.findUnique({
+            where: {
+                userId_commentId: {
+                    userId,
+                    commentId
+                }
+            }
+        });
+
+        if (existingLike) {
+            // Unlike
+            await prisma.commentLike.delete({
+                where: {
+                    userId_commentId: {
+                        userId,
+                        commentId
+                    }
+                }
+            });
+
+            await prisma.comment.update({
+                where: { id: commentId },
+                data: { likesCount: { decrement: 1 } }
+            });
+
+            return { message: "unliked", error: null, success: true };
+        } else {
+            // Like
+            await prisma.commentLike.create({
+                data: { userId, commentId }
+            });
+
+            await prisma.comment.update({
+                where: { id: commentId },
+                data: { likesCount: { increment: 1 } }
+            });
+
+            return { message: "liked", error: null, success: true };
+        }
+
+    } catch (err: any) {
+        console.error("ToggleCommentLike Error:", err);
+        return {
+            message: "An error occurred during like/unlike process.",
             error: err.message || "Unknown error",
             success: false
         };
