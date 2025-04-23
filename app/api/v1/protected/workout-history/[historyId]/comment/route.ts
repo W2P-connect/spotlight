@@ -44,12 +44,16 @@ export const GET = async (
 ) => {
     const { historyId } = await params;
 
+    const user_id = req.headers.get("x-user-id") as string;
+
     // Pagination (ex: ?limit=10&offset=0)
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const result = await getComments(historyId, limit, offset);
+    console.log("-------> historyId", historyId);
+
+    const result = await getComments(user_id, historyId, limit, offset);
 
     if (!result.success) {
         return apiResponse({

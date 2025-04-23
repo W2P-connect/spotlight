@@ -90,6 +90,14 @@ export async function createComment(userId: string, postId: string, content: str
             return { message: "Invalid comment content.", error: "InvalidContent", success: false };
         }
 
+        if (cleanContent.length > 2200) {
+            return {
+                message: "Invalid comment content: limite max autorisée à 2 200 caractères.",
+                error: "TooLong",
+                success: false
+            };
+        }
+
         const comment = await prisma.comment.create({
             data: {
                 userId,
@@ -118,15 +126,14 @@ export async function createComment(userId: string, postId: string, content: str
     }
 }
 
-export async function getComments(postId: string, limit: number = 10, offset: number = 0) {
+export async function getComments(userId: string, postId: string, limit: number = 10, offset: number = 0) {
     try {
-        // Vérifier que le post existe
         const post = await prisma.workoutHistory.findUnique({ where: { id: postId } });
         if (!post) {
             return { message: "Post not found.", error: "PostNotFound", success: false };
         }
 
-        // Récupérer les commentaires principaux avec leurs réponses
+        // 1️⃣ Récupérer les commentaires principaux avec leurs réponses
         const comments = await prisma.comment.findMany({
             where: {
                 postId,
@@ -154,12 +161,36 @@ export async function getComments(postId: string, limit: number = 10, offset: nu
                     }
                 }
             },
-            orderBy: { createdAt: 'desc' },  // Ou 'asc' si tu préfères
+            orderBy: { createdAt: 'desc' },
             take: limit,
             skip: offset
         });
 
-        return { message: "Fetched", error: null, success: true, data: comments };
+        const commentIds = comments.flatMap(c => [
+            c.id,
+            ...c.replies.map(r => r.id)
+        ]);
+
+        const likedComments = await prisma.commentLike.findMany({
+            where: {
+                userId,
+                commentId: { in: commentIds }
+            },
+            select: { commentId: true }
+        });
+
+        const likedCommentIds = new Set(likedComments.map(like => like.commentId));
+
+        const enrichedComments = comments.map(comment => ({
+            ...comment,
+            isLikedByCurrentUser: likedCommentIds.has(comment.id),
+            replies: comment.replies.map(reply => ({
+                ...reply,
+                isLikedByCurrentUser: likedCommentIds.has(reply.id)
+            }))
+        }));
+
+        return { message: "Fetched", error: null, success: true, data: enrichedComments };
 
     } catch (err: any) {
         console.error("GetComments Error:", err);

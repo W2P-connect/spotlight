@@ -22,7 +22,8 @@ export const GET = async (req: NextRequest) => {
             ownerId: userId
         };
 
-        if (onlyPublic) {
+
+        if (onlyPublic === 'true') {
             whereClause.isPublic = true;
         }
         if (workoutTemplateId) {
