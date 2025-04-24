@@ -1,6 +1,7 @@
 import { Profile } from '@prisma/client';
 import { prisma } from './prisma';
 import { createClient } from '@supabase/supabase-js';
+import { sendPushNotification } from '@/lib/notifiaciton/notification';
 
 // Note: supabaseAdmin uses the SERVICE_ROLE_KEY which you must only use in a secure server-side context
 // as it has admin privileges and overwrites RLS policies!
@@ -124,6 +125,17 @@ export async function toggleFollow(followerId: string, followingId: string) {
                 where: { id: followerId },
                 data: { followingCount: { increment: 1 } }
             });
+
+            const profile = await prisma.profile.findUnique({ where: { id: followerId } });
+            if (profile?.username) {
+                sendPushNotification(
+                    followerId,
+                    `${profile.username} à commencé à vous suivre !`,
+                    { userName: profile.username },
+                    "Nouveau follower !",
+                    "follow",
+                );
+            }
 
             return {
                 message: "followed",

@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { sendPushNotification } from "@/utils/notification";
+import { sendPushNotification } from "@/lib/notifiaciton/notification";
 import sanitizeHtml from 'sanitize-html';
+import newCommentNotification from "../notifiaciton/newCommentNotificaiton";
+import newLikeNotification from "../notifiaciton/newLikeNotification ";
 
 export async function toggleLike(userId: string, postId: string) {
     try {
@@ -50,6 +52,8 @@ export async function toggleLike(userId: string, postId: string) {
                 data: { likesCount: { increment: 1 } }
             });
 
+            newLikeNotification(postId, userId);
+            
             return {
                 message: "liked",
                 error: null,
@@ -107,6 +111,12 @@ export async function createComment(userId: string, postId: string, content: str
                 parentId: parentId || null
             }
         });
+
+        if (parentId) {
+            //notification réponse            
+        } else {
+            newCommentNotification(postId, userId)
+        }
 
         if (!parentId) {
             await prisma.workoutHistory.update({
@@ -243,9 +253,6 @@ export async function toggleCommentLike(userId: string, commentId: string) {
                 where: { id: commentId },
                 data: { likesCount: { increment: 1 } }
             });
-
-            const profile = await prisma.profile.findUnique({ where: { id: userId } });
-            profile && sendPushNotification(userId, `${profile.username} à liker votre commentaire!`);
 
             return { message: "liked", error: null, success: true };
         }

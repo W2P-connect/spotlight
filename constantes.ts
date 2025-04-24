@@ -1,0 +1,1 @@
+export const NOTIFICATION_GROUPING_WINDOW_MS = 4 * 60 * 60 * 1000;

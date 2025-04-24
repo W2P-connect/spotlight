@@ -29,12 +29,13 @@ model Profile {
   WorkoutHistory   WorkoutHistory[]
 
   // Relations Follow
-  following   Follow[]      @relation("UserFollowing")
-  followers   Follow[]      @relation("UserFollowers")
-  Like        Like[]
-  Comment     Comment[]
-  CommentLike CommentLike[]
-  PushToken   PushToken[]
+  following    Follow[]       @relation("UserFollowing")
+  followers    Follow[]       @relation("UserFollowers")
+  Like         Like[]
+  Comment      Comment[]
+  CommentLike  CommentLike[]
+  PushToken    PushToken[]
+  Notification Notification[]
 
   @@map("profile")
 }
@@ -263,6 +264,20 @@ model PushToken {
   updatedAt DateTime @updatedAt
 
   @@map("push_token")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  user      Profile  @relation(fields: [userId], references: [id])
+  userId    String   @db.Uuid
+  postId    String?  @db.Uuid //Pas de lien nécéssaire avec le reste, c'est uniquement pour groupe si bc de like
+  type      String
+  message   String
+  data      Json
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("notification")
 }
 
 enum Role {

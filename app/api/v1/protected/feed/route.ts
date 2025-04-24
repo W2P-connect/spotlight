@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export const GET = async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string;
 
-    const { searchParams } = new URL(req.url);
+    const searchParams = req.nextUrl.searchParams
     const limit = parseInt(searchParams.get('limit') || '5');
     const offset = parseInt(searchParams.get('offset') || '0');
 
