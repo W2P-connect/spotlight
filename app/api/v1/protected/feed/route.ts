@@ -6,7 +6,7 @@ export const GET = async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string;
 
     const { searchParams } = new URL(req.url);
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const limit = parseInt(searchParams.get('limit') || '5');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     if (!userId) {
@@ -50,6 +50,10 @@ export const GET = async (req: NextRequest) => {
                         displayName: true,
                     }
                 },
+                exercises: {
+                    include: { exercise: true },
+                    orderBy: { order: 'asc' }
+                },
                 Like: {
                     where: { userId: userId },
                     select: { id: true }
@@ -60,16 +64,6 @@ export const GET = async (req: NextRequest) => {
             take: limit
         });
 
-        // 3. Formatter les données
-        // const formattedPosts = posts.map(post => ({
-        //     id: post.id,
-        //     name: post.name,
-        //     date: post.date,
-        //     owner: post.owner,
-        //     likesCount: post.likesCount,
-        //     commentsCount: post.commentsCount,
-        //     hasLiked: post.Like.length > 0
-        // }));
 
         return apiResponse({
             message: "Feed fetched successfully.",

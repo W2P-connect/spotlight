@@ -4,6 +4,7 @@ import { NextResponse, NextRequest } from 'next/server';
 
 import { createAdminClient } from '@/utils/supabase/admin';
 import { userMetadataSchema } from '@/lib/zod/user';
+import { apiResponse } from '@/utils/apiResponse';
 
 
 export const PUT = async (
@@ -60,35 +61,28 @@ export const PUT = async (
             .eq('id', userId);
 
         if (profileUpdateError) {
-            return NextResponse.json(
-                {
-                    message: 'User metadata updated but failed to update values in profile table',
-                    error: profileUpdateError.message,
-                    success: false,
-                },
-                { status: 500 }
-            );
+            return apiResponse({
+                message: 'User metadata updated but failed to update values in profile table',
+                error: profileUpdateError.message,
+                success: false,
+                status: 500
+            });
         }
 
-        return NextResponse.json(
-            {
-                message: 'User metadata updated successfully',
-                data: data.user?.user_metadata,
-                success: true,
-            },
-            { status: 200 }
-        );
+        return apiResponse({
+            message: 'User metadata updated successfully',
+            data: data.user?.user_metadata,
+            success: true,
+        });
 
     } catch (error: any) {
         console.error('Error updating user metadata:', error);
-        return NextResponse.json(
-            {
-                message: 'An unexpected error occurred',
-                error: error.message,
-                success: false,
-            },
-            { status: 500 }
-        );
+        return apiResponse({
+            message: 'An unexpected error occurred',
+            error: error.message,
+            success: false,
+            status: 500
+        });
     }
 
 };
@@ -101,52 +95,41 @@ export const GET = async (req: NextRequest) => {
     const query = searchParams.get('q');
 
     if (!query || query.trim().length < 2) {
-        return NextResponse.json(
-            {
-                message: 'Query parameter "q" is required and must be at least 2 characters.',
-                success: false,
-            },
-            { status: 400 }
-        );
+        return apiResponse({
+            message: 'Query parameter "q" is required and must be at least 2 characters.',
+            success: false,
+        });
     }
 
     try {
         const { data, error } = await supabaseAdmin
             .from('profile')
-            .select('id, display_name, profil_picture')
+            .select('id, display_name, profil_picture, first_name, last_name, username')
             .ilike('search_value', `%${query}%`)
             .limit(10);
 
         if (error) {
-            return NextResponse.json(
-                {
-                    message: 'Failed to fetch users',
-                    error: error.message,
-                    success: false,
-                },
-                { status: 500 }
-            );
+            return apiResponse({
+                message: 'Failed to fetch users',
+                error: error.message,
+                success: false,
+                status: 500
+            });
         }
 
-        return NextResponse.json(
-            {
-                message: 'Users fetched successfully',
-                data,
-                // data: data.filter((user) => user.id !== user_id),
-                success: true,
-            },
-            { status: 200 }
-        );
+        return apiResponse({
+            message: 'Users fetched successfully',
+            data: data.filter((user) => user.id !== user_id),
+            success: true,
+        });
 
     } catch (error: any) {
         console.error('Error fetching users:', error);
-        return NextResponse.json(
-            {
-                message: 'An unexpected error occurred',
-                error: error.message,
-                success: false,
-            },
-            { status: 500 }
-        );
+        return apiResponse({
+            message: 'An unexpected error occurred',
+            error: error.message,
+            success: false,
+            status: 500
+        });
     }
 };

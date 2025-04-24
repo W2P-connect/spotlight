@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { sendPushNotification } from "@/utils/notification";
 import sanitizeHtml from 'sanitize-html';
 
 export async function toggleLike(userId: string, postId: string) {
@@ -145,7 +146,9 @@ export async function getComments(userId: string, postId: string, limit: number 
                         id: true,
                         username: true,
                         displayName: true,
-                        profilPicture: true
+                        profilPicture: true,
+                        lastName: true,
+                        firstName: true,
                     }
                 },
                 replies: {
@@ -240,6 +243,9 @@ export async function toggleCommentLike(userId: string, commentId: string) {
                 where: { id: commentId },
                 data: { likesCount: { increment: 1 } }
             });
+
+            const profile = await prisma.profile.findUnique({ where: { id: userId } });
+            profile && sendPushNotification(userId, `${profile.username} à liker votre commentaire!`);
 
             return { message: "liked", error: null, success: true };
         }

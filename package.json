@@ -19,6 +19,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
+    "expo-server-sdk": "^3.15.0",
     "lucide-react": "^0.468.0",
     "next": "latest",
     "next-themes": "^0.4.3",

@@ -34,6 +34,7 @@ model Profile {
   Like        Like[]
   Comment     Comment[]
   CommentLike CommentLike[]
+  PushToken   PushToken[]
 
   @@map("profile")
 }
@@ -251,6 +252,17 @@ model MuscleGroup {
   muscles Muscle[]
 
   @@map("muscle_group")
+}
+
+model PushToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  profileId String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("push_token")
 }
 
 enum Role {
