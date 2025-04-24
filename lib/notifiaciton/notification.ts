@@ -121,7 +121,7 @@ export async function sendPushNotification(
 
         const enrichedData = {
             ...data,
-            notificationId: dbNotification.id,
+            dbNotification: dbNotification,
         };
 
         const notification: ExpoPushMessage = {

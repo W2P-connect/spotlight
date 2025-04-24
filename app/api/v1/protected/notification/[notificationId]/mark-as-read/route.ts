@@ -4,10 +4,10 @@ import { apiResponse } from "@/utils/apiResponse";
 
 export const PUT = async (
     req: NextRequest,
-    { params }: { params: { notificationId: string } }
+    { params }: { params: Promise<{ notificationId: string }> }
 ) => {
     try {
-        const { notificationId } = params;
+        const { notificationId } = await params;
 
         await prisma.notification.update({
             where: { id: notificationId },
