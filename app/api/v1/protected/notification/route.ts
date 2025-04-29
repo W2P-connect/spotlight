@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiResponse } from "@/utils/apiResponse";
+import { log } from "console";
 
 export const GET = async (req: NextRequest) => {
     try {
@@ -19,7 +20,7 @@ export const GET = async (req: NextRequest) => {
             where: whereClause,
             orderBy: { createdAt: 'desc' },
         });
-
+        
         return apiResponse({
             message: 'Successfully fetched notifications',
             data: notifications,

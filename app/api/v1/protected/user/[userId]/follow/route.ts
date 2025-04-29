@@ -18,14 +18,14 @@ export const PUT = async (
             return NextResponse.json(
                 {
                     message: result.message,
-                    data: null,
+                    data: { followed: result.followed },
                     success: false,
                     error: result.error
                 }, { status: 400 })
         }
         return NextResponse.json({
             message: `User successfully ${result.message}`,
-            data: null,
+            data: { followed: result.followed },
             success: true,
         }, { status: 200 });
     } catch (error: any) {

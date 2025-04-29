@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { sendPushNotification } from "@/lib/notifiaciton/notification";
 import sanitizeHtml from 'sanitize-html';
 import newCommentNotification from "../notifiaciton/newCommentNotificaiton";
 import newLikeNotification from "../notifiaciton/newLikeNotification ";
+
 
 export async function toggleLike(userId: string, postId: string) {
     try {
@@ -53,7 +53,7 @@ export async function toggleLike(userId: string, postId: string) {
             });
 
             newLikeNotification(postId, userId);
-            
+
             return {
                 message: "liked",
                 error: null,
@@ -156,7 +156,7 @@ export async function getComments(userId: string, postId: string, limit: number 
                         id: true,
                         username: true,
                         displayName: true,
-                        profilPicture: true,
+                        profilePicture: true,
                         lastName: true,
                         firstName: true,
                     }
@@ -168,7 +168,7 @@ export async function getComments(userId: string, postId: string, limit: number 
                                 id: true,
                                 username: true,
                                 displayName: true,
-                                profilPicture: true
+                                profilePicture: true
                             }
                         }
                     }

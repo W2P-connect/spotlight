@@ -39,7 +39,6 @@ export const GET = async (req: NextRequest) => {
             };
         }
 
-        // Requête Prisma
         const workoutHistory = await prisma?.workoutHistory.findMany({
             where: whereClause,
             include: {
@@ -61,9 +60,24 @@ export const GET = async (req: NextRequest) => {
             }, { status: 404 });
         }
 
+        const owner = await prisma.profile.findUnique({
+            where: { id: userId },
+            select: {
+                id: true,
+                username: true,
+                profilePicture: true,
+                firstName: true,
+                lastName: true,
+                displayName: true,
+            }
+        });
+
         return NextResponse.json({
             message: 'Successfully retrieved workout history',
-            data: workoutHistory,
+            data: workoutHistory.map(workout => ({
+                ...workout,
+                owner
+            })),
             success: true,
         }, { status: 200 });
     } catch (err) {

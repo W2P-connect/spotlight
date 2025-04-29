@@ -44,7 +44,7 @@ export const GET = async (req: NextRequest) => {
                     select: {
                         id: true,
                         username: true,
-                        profilPicture: true,
+                        profilePicture: true,
                         firstName: true,
                         lastName: true,
                         displayName: true,
@@ -54,10 +54,6 @@ export const GET = async (req: NextRequest) => {
                     include: { exercise: true },
                     orderBy: { order: 'asc' }
                 },
-                Like: {
-                    where: { userId: userId },
-                    select: { id: true }
-                }
             },
             orderBy: { date: 'desc' },
             skip: offset,

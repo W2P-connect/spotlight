@@ -32,7 +32,8 @@ export const GET = async (req: NextRequest) => {
                 workoutHistory: { include: { exercises: { include: { exercise: true } } } },
                 workoutProgramLinks: { include: { workoutProgram: true } },
                 exercises: {
-                    include: { exercise: true }, orderBy: {
+                    include: { exercise: true },
+                    orderBy: {
                         order: 'asc'
                     }
                 }

@@ -19,6 +19,16 @@ export const GET = async (
                 isPublic: true,
             },
             include: {
+                owner: {
+                    select: {
+                        id: true,
+                        username: true,
+                        profilePicture: true,
+                        firstName: true,
+                        lastName: true,
+                        displayName: true,
+                    }
+                },
                 exercises: {
                     include: {
                         exercise: true,

@@ -4,6 +4,7 @@ export const workoutHistoryExerciseSchema = z.object({
     id: z.string().uuid(),
     workoutHistoryId: z.string().uuid(),
     exerciseId: z.string().uuid(),
+    comment: z.string(),
     nbReps: z.array(z.number().int().nonnegative()),
     weight: z.array(z.number().nonnegative()),
     minReps: z.array(z.number().int().nonnegative()),

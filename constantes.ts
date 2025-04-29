@@ -1,1 +1,2 @@
 export const NOTIFICATION_GROUPING_WINDOW_MS = 4 * 60 * 60 * 1000;
+export const FOLLOW_SPAM_WINDOW_MS = 12 * 60 * 60 * 1000;

@@ -36,8 +36,18 @@ const getProfileData = async (userId: Profile["id"], publicData = false) => {
     const profileData = {
         ...profile,
         ...user.user,
-        posts: profile.WorkoutHistory,
-        profilPicture: profile.profilPicture,
+        posts: profile.WorkoutHistory.map(workout => ({
+            ...workout,
+            owner: {
+                id: profile.id,
+                username: profile.username,
+                profilePicture: profile.profilePicture,
+                firtsName: profile.firstName,
+                lastName: profile.lastName,
+                displayName: profile.displayName
+            }
+        })),
+        profilePicture: profile.profilePicture,
         followers: profile?.followers.map(f => f.followerId),
         following: profile?.following.map(f => f.followingId),
         like: profile?.Like.map(f => f.postId),
@@ -47,7 +57,7 @@ const getProfileData = async (userId: Profile["id"], publicData = false) => {
 
     return {
         id: profileData.id,
-        profilPicture: profileData.profilPicture,
+        profilePicture: profileData.profilePicture,
         fisrtName: profileData.firstName,
         lastName: profileData.lastName,
         username: profileData.username,
@@ -67,6 +77,7 @@ export async function toggleFollow(followerId: string, followingId: string) {
         return {
             message: "You can't follow yourself.",
             error: "InvalidOperation",
+            followed: false,
             success: false
         };
     }
@@ -106,6 +117,7 @@ export async function toggleFollow(followerId: string, followingId: string) {
             return {
                 message: "unfollowed",
                 error: null,
+                followed: false,
                 success: true
             };
         } else {
@@ -129,9 +141,13 @@ export async function toggleFollow(followerId: string, followingId: string) {
             const profile = await prisma.profile.findUnique({ where: { id: followerId } });
             if (profile?.username) {
                 sendPushNotification(
+                    followingId,
                     followerId,
                     `${profile.username} à commencé à vous suivre !`,
-                    { userName: profile.username },
+                    {
+                        userName: profile.username,
+                        profilePicture: profile.profilePicture
+                    },
                     "Nouveau follower !",
                     "follow",
                 );
@@ -140,6 +156,7 @@ export async function toggleFollow(followerId: string, followingId: string) {
             return {
                 message: "followed",
                 error: null,
+                followed: true,
                 success: true
             };
         }
@@ -155,3 +172,24 @@ export async function toggleFollow(followerId: string, followingId: string) {
     }
 }
 
+export const getProfileById = async (userId: string) => {
+    return prisma.profile.findUnique({
+        where: { id: userId },
+    });
+};
+
+export const updateProfileData = async (userId: string, firstName: string, lastName: string, username: string) => {
+    const displayName = `${firstName} ${lastName} (${username})`.trim();
+    const searchValue = `${firstName} ${lastName} ${username}`.toLowerCase().trim();
+
+    return prisma.profile.update({
+        where: { id: userId },
+        data: {
+            lastName,
+            firstName,
+            username,
+            displayName,
+            searchValue,
+        }
+    });
+};

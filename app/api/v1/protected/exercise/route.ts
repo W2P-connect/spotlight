@@ -15,6 +15,13 @@ export const GET = async (req: NextRequest) => {
                     { isPublic: true }     // Exercices publics
                 ]
             },
+            include: {
+                muscles: {
+                    include: {
+                        muscleGroup: true
+                    }
+                },
+            },
             orderBy: {
                 createdAt: 'desc'
             }

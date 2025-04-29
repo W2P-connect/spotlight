@@ -8,14 +8,14 @@ datasource db {
 }
 
 model Profile {
-  id            String  @id @default(uuid()) @db.Uuid
-  role          Role    @default(user)
-  searchValue   String? @map("search_value")
-  displayName   String? @map("display_name")
-  firstName     String? @map("first_name")
-  lastName      String? @map("last_name")
-  username      String?
-  profilPicture String? @map("profil_picture")
+  id             String  @id @default(uuid()) @db.Uuid
+  role           Role    @default(user)
+  searchValue    String? @map("search_value")
+  displayName    String? @map("display_name")
+  firstName      String? @map("first_name")
+  lastName       String? @map("last_name")
+  username       String?
+  profilePicture String? @map("profil_picture")
 
   followersCount Int @default(0)
   followingCount Int @default(0)
@@ -29,13 +29,14 @@ model Profile {
   WorkoutHistory   WorkoutHistory[]
 
   // Relations Follow
-  following    Follow[]       @relation("UserFollowing")
-  followers    Follow[]       @relation("UserFollowers")
-  Like         Like[]
-  Comment      Comment[]
-  CommentLike  CommentLike[]
-  PushToken    PushToken[]
-  Notification Notification[]
+  following             Follow[]       @relation("UserFollowing")
+  followers             Follow[]       @relation("UserFollowers")
+  Like                  Like[]
+  Comment               Comment[]
+  CommentLike           CommentLike[]
+  PushToken             PushToken[]
+  receivedNotifications Notification[] @relation("receverUser")
+  createdNotifications  Notification[] @relation("createrUser")
 
   @@map("profile")
 }
@@ -248,8 +249,9 @@ model Muscle {
 }
 
 model MuscleGroup {
-  id      String   @id @default(uuid()) @db.Uuid
-  name    String
+  id   String @id @default(uuid()) @db.Uuid
+  name String
+
   muscles Muscle[]
 
   @@map("muscle_group")
@@ -258,24 +260,28 @@ model MuscleGroup {
 model PushToken {
   id        String   @id @default(uuid())
   token     String   @unique
-  profile   Profile  @relation(fields: [profileId], references: [id])
   profileId String   @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id])
 
   @@map("push_token")
 }
 
 model Notification {
   id        String   @id @default(uuid())
-  user      Profile  @relation(fields: [userId], references: [id])
   userId    String   @db.Uuid
+  createdBy String  @db.Uuid
   postId    String?  @db.Uuid //Pas de lien nécéssaire avec le reste, c'est uniquement pour groupe si bc de like
   type      String
   message   String
   data      Json
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  user        Profile  @relation(fields: [userId], references: [id], name: "receverUser")
+  createruser Profile? @relation(fields: [createdBy], references: [id], name: "createrUser")
 
   @@map("notification")
 }
