@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
+import { exerciseSchema } from '@/lib/zod/exercise';
+import { apiResponse } from '@/utils/apiResponse';
 
 export const GET = async (req: NextRequest) => {
     try {
@@ -46,11 +48,17 @@ export const POST = async (req: NextRequest) => {
         const userId = req.headers.get("x-user-id") as string;
         const exercise = await req.json();
 
+        const parsedExercise = exerciseSchema.safeParse({ ...exercise, ownerId: userId });
+
+        if (!parsedExercise.success) {
+            return apiResponse({
+                message: 'Invalid request body',
+                error: parsedExercise.error.message,
+                success: false,
+            });
+        }
         const createdExercise = await prisma.exercise.create({
-            data: {
-                ...exercise,
-                ownerId: userId
-            }
+            data: parsedExercise.data
         });
 
         return NextResponse.json({

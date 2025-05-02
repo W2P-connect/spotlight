@@ -36,4 +36,4 @@ export const updateWorkoutHistorySchema = z.object({
     workoutProgramId: z.string().uuid().nullable().optional(),
     isPublic: z.boolean().default(false),
     workoutPlace: z.string().nullable().optional(),
-});
+}).strip();
