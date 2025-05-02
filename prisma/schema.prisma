@@ -199,7 +199,7 @@ model WorkoutHistoryExercise {
   exerciseId       String  @db.Uuid
   comment          String?
   nbReps           Int[]
-  weight           Int[]
+  weight           Float[]
   minReps          Int[] // Fourchette min par série
   maxReps          Int[] // Fourchette max par série
   restTime         Int[] // Temps de repos en secondes

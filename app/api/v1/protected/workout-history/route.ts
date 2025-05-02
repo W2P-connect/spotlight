@@ -100,6 +100,7 @@ export const POST = async (req: NextRequest) => {
 
         const validatedExercises = z.array(workoutHistoryExerciseSchema).parse(body.exercises || []);
 
+        console.log("--------> validatedWorkout", validatedWorkout);
         console.log("--------> validatedExercises", validatedExercises);
 
 
@@ -108,9 +109,8 @@ export const POST = async (req: NextRequest) => {
             data: {
                 ...validatedWorkout,
                 exercises: {
-                    create: validatedExercises.map((exercise) => {
-                        const { id, workoutHistoryId, ...rest } = exercise; //Prisma se charge de remettre l'id lui même
-                        return rest;
+                    create: validatedExercises.map(({ workoutHistoryId, ...exercise }) => {
+                        return exercise;
                     })
                 }
             },
