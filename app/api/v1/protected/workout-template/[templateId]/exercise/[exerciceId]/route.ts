@@ -29,7 +29,7 @@ export const PUT = async (
         const body = await req.json();
         const parsedBody = updateSchema.safeParse(body);
 
-        console.log(parsedBody.data);
+        console.log({ ...parsedBody.data, templateId, id: exerciceId });
 
         if (!parsedBody.success) {
             console.log(parsedBody.error.format());

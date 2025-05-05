@@ -1,6 +1,7 @@
 import { Expo, ExpoPushMessage } from 'expo-server-sdk';
 import { prisma } from '@/lib/prisma';
 import { FOLLOW_SPAM_WINDOW_MS, NOTIFICATION_GROUPING_WINDOW_MS } from '@/constantes';
+import { Notification } from '@/types';
 
 const expo = new Expo();
 
@@ -10,7 +11,7 @@ type NotificationData = {
     [key: string]: any;
 };
 
-type NotificationType = "like" | "comment" | "generic" | "follow"
+type NotificationType = 'like' | 'comment' | 'generic' | 'follow'
 
 export function sendPushNotification(
     userId: string,
@@ -133,9 +134,10 @@ export async function sendPushNotification(
             return;
         }
 
-        const enrichedData = {
-            ...data,
-            dbNotification: dbNotification,
+        const enrichedData: Notification = {
+            ...dbNotification,
+            data
+
         };
 
         const notification: ExpoPushMessage = {

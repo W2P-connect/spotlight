@@ -162,6 +162,7 @@ export async function getComments(userId: string, postId: string, limit: number 
                     }
                 },
                 replies: {
+                    orderBy: { createdAt: 'asc' },
                     include: {
                         user: {
                             select: {
@@ -179,10 +180,12 @@ export async function getComments(userId: string, postId: string, limit: number 
             skip: offset
         });
 
+
         const commentIds = comments.flatMap(c => [
             c.id,
             ...c.replies.map(r => r.id)
         ]);
+
 
         const likedComments = await prisma.commentLike.findMany({
             where: {

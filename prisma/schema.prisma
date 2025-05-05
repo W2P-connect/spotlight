@@ -212,7 +212,6 @@ model WorkoutHistoryExercise {
   workoutHistory WorkoutHistory @relation(fields: [workoutHistoryId], references: [id], onDelete: Cascade)
   exercise       Exercise       @relation(fields: [exerciseId], references: [id])
 
-  @@unique([workoutHistoryId, exerciseId])
   @@map("workout_history_exercise")
 }
 
@@ -233,7 +232,6 @@ model WorkoutTemplateExercise {
   workoutTemplate WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
   exercise        Exercise        @relation(fields: [exerciseId], references: [id])
 
-  @@unique([workoutTemplateId, exerciseId])
   @@map("workout_template_exercise")
 }
 
@@ -270,15 +268,15 @@ model PushToken {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String   @db.Uuid
-  createdBy String  @db.Uuid
-  postId    String?  @db.Uuid //Pas de lien nécéssaire avec le reste, c'est uniquement pour groupe si bc de like
-  type      String
+  id        String           @id @default(uuid())
+  userId    String           @db.Uuid
+  createdBy String           @db.Uuid
+  postId    String?          @db.Uuid //Pas de lien nécéssaire avec le reste, c'est uniquement pour groupe si bc de like
+  type      NotificationType
   message   String
   data      Json
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
 
   user        Profile  @relation(fields: [userId], references: [id], name: "receverUser")
   createruser Profile? @relation(fields: [createdBy], references: [id], name: "createrUser")
@@ -289,4 +287,11 @@ model Notification {
 enum Role {
   admin
   user
+}
+
+enum NotificationType {
+  like
+  comment
+  generic
+  follow
 }

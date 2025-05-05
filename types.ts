@@ -44,3 +44,22 @@ export interface UserMetadata {
     weight?: string;
     profil_picture_uri?: string;
 }
+
+/********************************** NOTIFICATIONS **************************/
+
+export type Notification = {
+    id: string
+    type: 'like' | 'comment' | 'generic' | 'follow'
+    message: string
+    data: {
+        userName: string
+        profilePicture: string | null
+        users?: string[]
+        [key: string]: any
+    }
+    isRead: boolean
+    postId: string | null
+    createdAt: Date
+    userId: string
+    createdBy: string
+}
