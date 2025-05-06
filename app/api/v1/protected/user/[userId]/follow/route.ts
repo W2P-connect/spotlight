@@ -1,9 +1,12 @@
 import { toggleFollow } from "@/lib/profile";
+import { apiResponse } from "@/utils/apiResponse";
+import { logWarning, withErrorHandler } from "@/utils/errorHandler";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { removeUndefined } from "@/utils/utils";
 import { error } from "console";
 import { NextRequest, NextResponse } from "next/server";
 
-export const PUT = async (
+export const PUT = withErrorHandler(async (
     req: NextRequest,
     { params }: { params: Promise<{ userId: string }> }
 ) => {
@@ -11,32 +14,27 @@ export const PUT = async (
     const current_user_id = req.headers.get("x-user-id") as string;
     const { userId } = await params;
 
-    try {
-        const result = await toggleFollow(current_user_id, userId);
+    const result = await toggleFollow(current_user_id, userId);
 
-        if (!result.success) {
-            return NextResponse.json(
-                {
-                    message: result.message,
-                    data: { followed: result.followed },
-                    success: false,
-                    error: result.error
-                }, { status: 400 })
-        }
-        return NextResponse.json({
-            message: `User successfully ${result.message}`,
+    if (!result.success) {
+        return apiResponse({
+            message: result.message,
             data: { followed: result.followed },
-            success: true,
-        }, { status: 200 });
-    } catch (error: any) {
-        console.error('Error following users', error);
-        return NextResponse.json(
-            {
-                message: 'An unexpected error occurred',
-                error: error.message,
-                success: false,
-            },
-            { status: 500 }
-        );
+            success: false,
+            error: result.error,
+            req: req,
+            log: {
+                message: result.message ?? "Failed to toggle folow user",
+                metadata: {
+                    result: removeUndefined(result),
+                    userId_to_follow: userId,
+                },
+            }
+        })
     }
-};
+    return apiResponse({
+        message: `User successfully ${result.message}`,
+        data: { followed: result.followed },
+        success: true,
+    });
+});

@@ -1,3 +1,5 @@
+export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+
 /**************************** API ***************************/
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'

@@ -37,6 +37,7 @@ model Profile {
   PushToken             PushToken[]
   receivedNotifications Notification[] @relation("receverUser")
   createdNotifications  Notification[] @relation("createrUser")
+  ErrorLog              ErrorLog[]
 
   @@map("profile")
 }
@@ -282,6 +283,32 @@ model Notification {
   createruser Profile? @relation(fields: [createdBy], references: [id], name: "createrUser")
 
   @@map("notification")
+}
+
+model ErrorLog {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  level       ErrorLevel
+  message     String
+  stackTrace  String     @map("stack_trace")
+  endpoint    String?
+  requestId   String?    @map("request_id")
+  userId      String?    @map("user_id") @db.Uuid
+  metadata    Json?
+  environment String     @default("production")
+  resolvedAt  DateTime?
+
+  user Profile? @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([level])
+  @@map("error_log")
+}
+
+enum ErrorLevel {
+  error
+  warning
 }
 
 enum Role {

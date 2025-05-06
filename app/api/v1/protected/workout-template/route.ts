@@ -2,76 +2,68 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withErrorHandler } from '@/utils/errorHandler';
+import { apiResponse } from '@/utils/apiResponse';
 
-export const GET = async (req: NextRequest) => {
-    try {
-        const userId = req.headers.get("x-user-id") as string //From middleware;
-        const searchParams = req.nextUrl.searchParams;
+export const GET = withErrorHandler(async (req: NextRequest) => {
+    const userId = req.headers.get("x-user-id") as string //From middleware;
+    const searchParams = req.nextUrl.searchParams;
 
-        const workoutTemplateId = searchParams.get('workoutTemplateId');
-        const workoutProgramId = searchParams.get('workoutProgramId');
-        const sortOrder = searchParams.get('date') || 'newest';
+    const workoutTemplateId = searchParams.get('workoutTemplateId');
+    const workoutProgramId = searchParams.get('workoutProgramId');
+    const sortOrder = searchParams.get('date') || 'newest';
 
-        const whereClause: any = {
-            ownerId: userId
-        };
-        if (workoutTemplateId) {
-            whereClause.id = workoutTemplateId;
-        }
-        if (workoutProgramId) {
-            whereClause.workoutPrograms = {
-                some: {
-                    id: workoutProgramId
-                }
+    const whereClause: any = {
+        ownerId: userId
+    };
+    if (workoutTemplateId) {
+        whereClause.id = workoutTemplateId;
+    }
+    if (workoutProgramId) {
+        whereClause.workoutPrograms = {
+            some: {
+                id: workoutProgramId
             }
         }
+    }
 
-        const workoutTemplates = await prisma?.workoutTemplate.findMany({
-            where: whereClause,
-            include: {
-                workoutHistory: { include: { exercises: { include: { exercise: true } } } },
-                workoutProgramLinks: { include: { workoutProgram: true } },
-                exercises: {
-                    include: { exercise: true },
-                    orderBy: {
-                        order: 'asc'
-                    }
+    const workoutTemplates = await prisma?.workoutTemplate.findMany({
+        where: whereClause,
+        include: {
+            workoutHistory: { include: { exercises: { include: { exercise: true } } } },
+            workoutProgramLinks: { include: { workoutProgram: true } },
+            exercises: {
+                include: { exercise: true },
+                orderBy: {
+                    order: 'asc'
                 }
-            },
-            orderBy: {
-                createdAt: sortOrder === 'newest' ? 'desc' : 'asc'
             }
-        })
-
-        if (!workoutTemplates) {
-            return NextResponse.json({
-                message: 'No Workout History found',
-                data: [],
-                success: false,
-            }, { status: 404 });
+        },
+        orderBy: {
+            createdAt: sortOrder === 'newest' ? 'desc' : 'asc'
         }
+    })
 
-
-        const formattedWorkoutTemplates = workoutTemplates.map(({ workoutProgramLinks, ...rest }) => ({
-            ...rest,
-            workoutPrograms: workoutProgramLinks.map(link => link.workoutProgram)
-        }));
-
-        return NextResponse.json({
-            message: 'Successfully retrieved workout templates',
-            data: formattedWorkoutTemplates,
-            success: true,
-        }, { status: 200 });
-
-    } catch (err) {
-        console.error(err);
-        return NextResponse.json({
-            message: 'Failed to retrieve profile data',
+    if (!workoutTemplates) {
+        return apiResponse({
+            message: 'No Workout History found',
             data: [],
             success: false,
-        }, { status: 500 });
+            status: 404
+        });
     }
-};
+
+    const formattedWorkoutTemplates = workoutTemplates.map(({ workoutProgramLinks, ...rest }) => ({
+        ...rest,
+        workoutPrograms: workoutProgramLinks.map(link => link.workoutProgram)
+    }));
+
+    return apiResponse({
+        message: 'Successfully retrieved workout templates',
+        data: formattedWorkoutTemplates,
+        success: true,
+    });
+});
 
 export const POST = async (req: NextRequest) => {
     const workoutTemplate = await req.json();
@@ -85,16 +77,22 @@ export const POST = async (req: NextRequest) => {
     })
 
     if (!newWorkoutTemplate) {
-        return NextResponse.json({
+        return apiResponse({
             message: 'Failed to create workout template',
-            data: [],
             success: false,
-        }, { status: 500 });
+            req: req,
+            log: {
+                message: 'Failed to create workout template',
+                metadata: {
+                    body: workoutTemplate
+                },
+            }
+        });
     }
 
-    return NextResponse.json({
+    return apiResponse({
         message: 'Successfully created workout template',
         data: newWorkoutTemplate,
         success: true,
-    }, { status: 200 });
+    });
 }

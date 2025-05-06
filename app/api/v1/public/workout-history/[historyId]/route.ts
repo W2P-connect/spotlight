@@ -3,69 +3,63 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import getProfileData from '@/lib/profile';
+import { withErrorHandler } from '@/utils/errorHandler';
+import { apiResponse } from '@/utils/apiResponse';
 
-export const GET = async (
+export const GET = withErrorHandler(async (
     req: NextRequest,
     { params }: { params: Promise<{ historyId: string }> }
 ) => {
+    const { historyId } = await params;
 
-    try {
-        const { historyId } = await params;
-
-
-        const history = await prisma.workoutHistory.findUnique({
-            where: {
-                id: historyId,
-                isPublic: true,
+    const history = await prisma.workoutHistory.findUnique({
+        where: {
+            id: historyId,
+            isPublic: true,
+        },
+        include: {
+            owner: {
+                select: {
+                    id: true,
+                    username: true,
+                    profilePicture: true,
+                    firstName: true,
+                    lastName: true,
+                    displayName: true,
+                }
             },
-            include: {
-                owner: {
-                    select: {
-                        id: true,
-                        username: true,
-                        profilePicture: true,
-                        firstName: true,
-                        lastName: true,
-                        displayName: true,
-                    }
+            exercises: {
+                include: {
+                    exercise: true,
                 },
-                exercises: {
-                    include: {
-                        exercise: true,
-                    },
-                },
-            }
-        });
-
-
-        if (!history) {
-            return NextResponse.json({
-                message: 'Workout history not found or is not public',
-                success: false,
-            }, { status: 404 });
-        }
-
-        const user = await getProfileData(history.ownerId);
-        if (!user) {
-            return NextResponse.json({
-                message: "History's user not found or is deleted",
-                success: false,
-            }, { status: 404 });
-        }
-
-        return NextResponse.json({
-            message: 'Successfully finded history',
-            data: {
-                history: history,
-                user: user,
             },
-            success: true,
-        }, { status: 200 });
-    } catch (err) {
-        return NextResponse.json({
-            message: 'Failed to get history',
-            data: [],
+        }
+    });
+
+
+    if (!history) {
+        return apiResponse({
+            message: 'Workout history not found or is not public',
             success: false,
-        }, { status: 500 });
+            status: 404,
+        });
     }
-};
+
+    const user = await getProfileData(history.ownerId);
+    if (!user) {
+        return apiResponse({
+            message: "History's user not found or is deleted",
+            success: false,
+            status: 404
+        });
+    }
+
+    return apiResponse({
+        message: 'Successfully finded history',
+        data: {
+            history: history,
+            user: user,
+        },
+        success: true,
+    });
+});

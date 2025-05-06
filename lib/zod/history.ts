@@ -16,6 +16,16 @@ export const workoutHistoryExerciseSchema = z.object({
     updatedAt: z.string().datetime(),
 }).strip();
 
+export const updateWorkoutHistoryExerciseSchema = z.object({
+    order: z.number().nonnegative().optional(),
+    nbReps: z.array(z.number().int().positive()).optional(),
+    weight: z.array(z.number().positive()).optional(),
+    comment: z.string().nullable().optional(),
+    restTime: z.array(z.number().int().nonnegative()).optional(),
+    supersetId: z.string().uuid().nullable().optional(),
+    exerciseId: z.string().uuid().optional(),
+}).strip();
+
 export const workoutHistorySchema = z.object({
     id: z.string().uuid(),
     date: z.string().datetime().optional(),
