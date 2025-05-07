@@ -21,10 +21,9 @@ export const DELETE = withErrorHandler(async (
             ownerId: userId,
         }
     })
-    return NextResponse.json({
+    return apiResponse({
         message: "Succesfully deleted",
         success: true,
-        data: null,
     })
 });
 

@@ -53,7 +53,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         data: parsedExercise.data
     });
 
-    return NextResponse.json({
+    return apiResponse({
         message: 'Successfully created exercise',
         data: createdExercise,
         success: true,

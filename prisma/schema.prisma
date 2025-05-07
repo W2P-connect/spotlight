@@ -29,15 +29,16 @@ model Profile {
   WorkoutHistory   WorkoutHistory[]
 
   // Relations Follow
-  following             Follow[]       @relation("UserFollowing")
-  followers             Follow[]       @relation("UserFollowers")
+  following             Follow[]              @relation("UserFollowing")
+  followers             Follow[]              @relation("UserFollowers")
   Like                  Like[]
   Comment               Comment[]
   CommentLike           CommentLike[]
   PushToken             PushToken[]
-  receivedNotifications Notification[] @relation("receverUser")
-  createdNotifications  Notification[] @relation("createrUser")
+  receivedNotifications Notification[]        @relation("receverUser")
+  createdNotifications  Notification[]        @relation("createrUser")
   ErrorLog              ErrorLog[]
+  FailedClientRequest   FailedClientRequest[]
 
   @@map("profile")
 }
@@ -304,6 +305,27 @@ model ErrorLog {
   @@index([userId])
   @@index([level])
   @@map("error_log")
+}
+
+model FailedClientRequest {
+  id        String   @id @default(uuid()) @db.Uuid
+  createdAt DateTime @default(now())
+  userId    String   @db.Uuid
+  user      Profile  @relation(fields: [userId], references: [id])
+
+  endpoint   String
+  method     String
+  data       Json?
+  totalTry   Int
+  lastTry    DateTime?
+  appVersion String?
+  deviceId   String?
+
+  resolved   Boolean   @default(false)
+  resolvedAt DateTime?
+  notes      String?
+
+  @@map("failed_client_request")
 }
 
 enum ErrorLevel {

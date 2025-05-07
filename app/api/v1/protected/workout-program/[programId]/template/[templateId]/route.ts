@@ -83,15 +83,6 @@ export const DELETE = withErrorHandler(async (
     req: NextRequest,
     { params }: { params: Promise<{ programId: string, templateId: string }> }
 ) => {
-    // Vérification de l'ID utilisateur
-    const userId = req.headers.get("x-user-id");
-    if (!userId) {
-        return NextResponse.json({
-            message: 'User ID is required in headers',
-            success: false,
-        }, { status: 401 });
-    }
-
     // Vérification des paramètres
     const { programId, templateId } = await params;
     if (!programId || !templateId) {
@@ -107,7 +98,7 @@ export const DELETE = withErrorHandler(async (
             workoutProgramId_workoutTemplateId: {
                 workoutProgramId: programId,
                 workoutTemplateId: templateId
-            }
+            } 
         }
     });
 
