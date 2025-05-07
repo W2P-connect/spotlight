@@ -5,7 +5,6 @@ import { NextRequest } from 'next/server';
 import { createAdminClient, updateUserMetadata } from '@/utils/supabase/admin';
 import { isValidName, isValidUsername, userMetadataSchema } from '@/lib/zod/user';
 import { apiResponse } from '@/utils/apiResponse';
-import { prisma } from '@/lib/prisma';
 import { getProfileById, updateProfileData } from '@/lib/profile';
 import { withErrorHandler } from '@/utils/errorHandler';
 
@@ -80,7 +79,7 @@ export const PUT = withErrorHandler(async (req: NextRequest) => {
         });
     }
 
-    if (profile.username !== username && profile.username) {
+    if (profile.username !== username && profile.username && username) {
         return apiResponse({
             message: 'Username cannot be changed',
             success: false,

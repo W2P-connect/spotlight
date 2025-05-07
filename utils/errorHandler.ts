@@ -14,8 +14,13 @@ export function withErrorHandler(handler: Handler): Handler {
 
         if (methodAllowsBody) {
             try {
-                body = await req.json();
-                (req as any).json = async () => body; //OverWrite la fonction qui ne peut ce lancer de base qu'une fois
+                const contentType = req.headers.get("content-type") || "";
+                if (contentType.includes("application/json")) {
+                    console.log("json");
+                    
+                    body = await req.json();
+                    (req as NextRequest).json = async () => body; //OverWrite la fonction qui ne peut ce lancer de base qu'une fois
+                }
             } catch (_) {
                 console.log("Failed to parse request body");
             }
@@ -24,6 +29,9 @@ export function withErrorHandler(handler: Handler): Handler {
         try {
             return await handler(req, ctx);
         } catch (error: any) {
+
+            console.log("error", error);
+
             const user_id = req.headers.get("x-user-id");
 
             try {
