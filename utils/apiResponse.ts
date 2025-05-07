@@ -48,6 +48,7 @@ export async function apiResponse({
         }
 
         await logWarning({
+            level: status === 500 ? "error" : "warning",
             message,
             userId: log.userId ?? (req.headers.get("x-user-id") as string | undefined),
             endpoint: log.endpoint ?? req.nextUrl.pathname,

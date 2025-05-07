@@ -67,7 +67,7 @@ model WorkoutProgram {
 }
 
 model WorkoutTemplate {
-  id                  String                          @id @default(uuid()) @db.Uuid
+  id                  String                          @id @db.Uuid
   name                String
   ownerId             String                          @db.Uuid
   createdAt           DateTime                        @default(now())
@@ -81,7 +81,7 @@ model WorkoutTemplate {
 }
 
 model WorkoutHistory {
-  id                String                   @id @default(uuid()) @db.Uuid
+  id                String                   @id @db.Uuid
   date              DateTime                 @default(now())
   ownerId           String                   @db.Uuid
   workoutTemplateId String?                  @db.Uuid
@@ -164,7 +164,7 @@ model Exercise {
 }
 
 model WorkoutProgramWorkoutTemplate {
-  id                String          @id @default(uuid()) @db.Uuid
+  id                String          @id @db.Uuid
   workoutProgramId  String          @db.Uuid
   workoutTemplateId String          @db.Uuid
   createdAt         DateTime        @default(now())

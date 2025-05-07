@@ -62,18 +62,20 @@ export async function logWarning({
     endpoint,
     userId,
     metadata,
+    level = "warning",
 }: {
     message: string;
     endpoint: string;
     userId?: string | null;
     metadata?: Json;
+    level?: "warning" | "error";
 }) {
     try {
         const safeMetadata = isJsonSerializable(metadata) ? metadata : { note: "Unserializable metadata" };
 
         await prisma.errorLog.create({
             data: {
-                level: "warning",
+                level,
                 message,
                 stackTrace: "", // Pas de stack pour les warnings métier
                 endpoint,

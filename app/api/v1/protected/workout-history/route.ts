@@ -7,6 +7,9 @@ import { Prisma } from '@prisma/client';
 import { workoutHistoryExerciseSchema, workoutHistorySchema } from '@/lib/zod/history';
 import { apiResponse } from '@/utils/apiResponse';
 import { withErrorHandler } from '@/utils/errorHandler';
+import { createClient } from '@/utils/supabase/server';
+import { safeStringify } from '@/utils/utils';
+import { createAdminClient } from '@/utils/supabase/admin';
 
 
 export const GET = (async (req: NextRequest) => {
@@ -22,7 +25,6 @@ export const GET = (async (req: NextRequest) => {
     const whereClause: any = {
         ownerId: userId
     };
-
 
     if (onlyPublic === 'true') {
         whereClause.isPublic = true;
@@ -90,27 +92,64 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const body = await req.json();
     const userId = req.headers.get("x-user-id") as string;
 
+    const supabase = await createAdminClient();
 
+    // 1. Validation
     const validatedWorkout = workoutHistorySchema.parse({ ...body, ownerId: userId });
-
-    console.log("==> validatedWorkout", validatedWorkout);
-    
-    const newWorkoutHistory = await prisma.workoutHistory.create({
-        data: validatedWorkout,
-    });
-
     const validatedExercises = z.array(workoutHistoryExerciseSchema).parse(body.exercises || []);
 
-    console.log("==> validatedExercises", validatedExercises);
+    // console.log(" => validatedWorkout", validatedWorkout);
+    // console.log(" => validatedExercises", validatedExercises);
 
-    await prisma.workoutHistoryExercise.createMany({
-        data: validatedExercises.map(({ workoutHistoryId, ...exercise }) => ({
-            ...exercise,
-            workoutHistoryId: newWorkoutHistory.id,
-        })),
-    });
+    // 2. Transaction avec Supabase
+    const { data: workout, error: workoutError } = await supabase
+        .from('workout_history')
+        .insert([validatedWorkout])
+        .select()
+        .single();
 
+    if (workoutError) {
+        console.error("Error creating workout:", workoutError);
+        return apiResponse({
+            message: "Failed to create workout",
+            success: false,
+            status: 500,
+            log: {
+                message: "Failed to create workout",
+                metadata: {
+                    body,
+                    error: safeStringify(workoutError),
+                },
+            },
+            req: req,
+        });
+    }
 
+    const { error: exercisesError } = await supabase
+        .from('workout_history_exercise')
+        .insert(
+            validatedExercises.map(({ workoutHistoryId, ...exercise }) => ({
+                ...exercise,
+                workoutHistoryId: workout.id,
+            }))
+        );
+
+    if (exercisesError) {
+        console.error("Error creating exercises:", exercisesError);
+        return apiResponse({
+            message: "Failed to create exercises",
+            success: false,
+            status: 500,
+            log: {
+                message: "Failed to create exercises",
+                metadata: {
+                    body,
+                    error: safeStringify(exercisesError),
+                },
+            },
+            req: req,
+        });
+    }
 
     return apiResponse({
         message: "Successfully created workout history with exercises",
