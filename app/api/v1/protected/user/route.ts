@@ -48,9 +48,6 @@ export const PUT = withErrorHandler(async (req: NextRequest) => {
 
     const parsedMetadata = userMetadataSchema.safeParse(body.metadata);
 
-    console.log("parsedMetadata", parsedMetadata);
-    console.log("body", body);
-
     if (!parsedMetadata.success) {
         return apiResponse({
             message: 'Invalid metadata in request body',
@@ -99,7 +96,7 @@ export const PUT = withErrorHandler(async (req: NextRequest) => {
         });
     }
 
-    const updatedProfile = await updateProfileData(userId, firstName, lastName, username);
+    const updatedProfile = await updateProfileData(userId, firstName ?? profile.firstName, lastName ?? profile.lastName, username ?? profile.username);
 
     const responseUpdate = await updateUserMetadata(userId, parsedMetadata.data);
 
