@@ -17,22 +17,11 @@ export function withErrorHandler(handler: Handler): Handler {
             try {
                 let body = null;
                 try {
-                    body = await req.clone().json();
+                    body = await req.json();
                 } catch (_) {
+                    console.log("Failed to parse request body");
                     body = null;
                 }
-
-                const enrichedErrorInfo = {
-                    name: error?.name,
-                    message: error?.message,
-                    code: error?.code,
-                    meta: error?.meta,
-                    target: error?.target,
-                    clientVersion: error?.clientVersion,
-                    stack: error?.stack,
-                };
-
-
 
                 await prisma.errorLog.create({
                     data: {
@@ -46,7 +35,7 @@ export function withErrorHandler(handler: Handler): Handler {
                             params: Object.fromEntries(req.nextUrl.searchParams),
                             body,
                             headers: Object.fromEntries(req.headers.entries()),
-                            error: enrichedErrorInfo,
+                            error: error,
                         },
                         environment: process.env.NODE_ENV ?? "production",
                     },
