@@ -33,7 +33,7 @@ export const updateUserMetadata = async (
         ...newMetadata,
     };
 
-    const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
+    const { error: updateError, data } = await supabase.auth.admin.updateUserById(userId, {
         user_metadata: updatedMetadata,
     });
 

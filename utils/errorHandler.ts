@@ -16,8 +16,6 @@ export function withErrorHandler(handler: Handler): Handler {
             try {
                 const contentType = req.headers.get("content-type") || "";
                 if (contentType.includes("application/json")) {
-                    console.log("json");
-                    
                     body = await req.json();
                     (req as NextRequest).json = async () => body; //OverWrite la fonction qui ne peut ce lancer de base qu'une fois
                 }
