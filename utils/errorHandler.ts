@@ -8,21 +8,23 @@ type Handler = (req: NextRequest, ctx?: any) => Promise<Response>;
 
 export function withErrorHandler(handler: Handler): Handler {
     return async (req: NextRequest, ctx?: any): Promise<Response> => {
+        let body: any = null;
+
+        // Lecture anticipée du body et surchargement de req.json()
+        try {
+            body = await req.json();
+            // Monkey patch: remplace req.json() par une fonction qui retourne le body lu
+            (req as any).json = async () => body;
+        } catch (_) {
+            console.log("Failed to parse request body");
+        }
+
         try {
             return await handler(req, ctx);
         } catch (error: any) {
             const user_id = req.headers.get("x-user-id");
 
-            // Log en base
             try {
-                let body = null;
-                try {
-                    body = await req.json();
-                } catch (_) {
-                    console.log("Failed to parse request body");
-                    body = null;
-                }
-
                 await prisma.errorLog.create({
                     data: {
                         level: "error",
@@ -35,7 +37,7 @@ export function withErrorHandler(handler: Handler): Handler {
                             params: Object.fromEntries(req.nextUrl.searchParams),
                             body,
                             headers: Object.fromEntries(req.headers.entries()),
-                            error: error,
+                            error,
                         },
                         environment: process.env.NODE_ENV ?? "production",
                     },
