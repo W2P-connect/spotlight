@@ -90,31 +90,29 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const body = await req.json();
     const userId = req.headers.get("x-user-id") as string;
 
-    // Validation et nettoyage des données
     const validatedWorkout = workoutHistorySchema.parse({ ...body, ownerId: userId });
+
+    console.log("==> validatedWorkout", validatedWorkout);
+
+    const newWorkoutHistory = await prisma.workoutHistory.create({
+        data: validatedWorkout,
+    });
 
     const validatedExercises = z.array(workoutHistoryExerciseSchema).parse(body.exercises || []);
 
-    console.log("validatedWorkout, validatedExercises", { validatedWorkout, validatedExercises });
+    console.log("==> validatedExercises", validatedExercises);
 
-    // Création du lien entre le programme et la séance
-    const newWorkoutHistory = await prisma.workoutHistory.create({
-        data: {
-            ...validatedWorkout,
-            exercises: {
-                create: validatedExercises.map(({ workoutHistoryId, ...exercise }) => {
-                    return exercise;
-                })
-            }
-        },
-        include: {
-            exercises: true
-        }
+    await prisma.workoutHistoryExercise.createMany({
+        data: validatedExercises.map(({ workoutHistoryId, ...exercise }) => ({
+            ...exercise,
+            workoutHistoryId: newWorkoutHistory.id,
+        })),
     });
 
+
+
     return apiResponse({
-        message: "Successfully created workout history",
-        data: newWorkoutHistory,
+        message: "Successfully created workout history with exercises",
         success: true,
         status: 201,
     });
