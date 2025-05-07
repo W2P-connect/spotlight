@@ -90,10 +90,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const body = await req.json();
     const userId = req.headers.get("x-user-id") as string;
 
+
     const validatedWorkout = workoutHistorySchema.parse({ ...body, ownerId: userId });
 
     console.log("==> validatedWorkout", validatedWorkout);
-
+    
     const newWorkoutHistory = await prisma.workoutHistory.create({
         data: validatedWorkout,
     });

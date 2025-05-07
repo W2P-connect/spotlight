@@ -10,13 +10,15 @@ export function withErrorHandler(handler: Handler): Handler {
     return async (req: NextRequest, ctx?: any): Promise<Response> => {
         let body: any = null;
 
-        // Lecture anticipée du body et surchargement de req.json()
-        try {
-            body = await req.json();
-            // Monkey patch: remplace req.json() par une fonction qui retourne le body lu
-            (req as any).json = async () => body;
-        } catch (_) {
-            console.log("Failed to parse request body");
+        const methodAllowsBody = ["POST", "PUT", "PATCH", "DELETE"].includes(req.method);
+
+        if (methodAllowsBody) {
+            try {
+                body = await req.json();
+                (req as any).json = async () => body; //OverWrite la fonction qui ne peut ce lancer de base qu'une fois
+            } catch (_) {
+                console.log("Failed to parse request body");
+            }
         }
 
         try {
