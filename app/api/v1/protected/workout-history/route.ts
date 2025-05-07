@@ -95,6 +95,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     const validatedExercises = z.array(workoutHistoryExerciseSchema).parse(body.exercises || []);
 
+    console.log("validatedWorkout, validatedExercises", { validatedWorkout, validatedExercises });
+
     // Création du lien entre le programme et la séance
     const newWorkoutHistory = await prisma.workoutHistory.create({
         data: {
