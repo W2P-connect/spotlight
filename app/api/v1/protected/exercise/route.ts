@@ -9,14 +9,27 @@ import { withErrorHandler } from '@/utils/errorHandler';
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string;
+    const searchParams = req.nextUrl.searchParams
+    const since = searchParams.get("since");
+
+    const whereClause: Prisma.ExerciseWhereInput = {
+        AND: [
+            {
+                OR: [
+                    { ownerId: userId },
+                    { isPublic: true }
+                ],
+            },
+            since ? { updatedAt: { gt: new Date(since) } } : {},
+        ],
+    };
+
+    if (since) {
+        whereClause.updatedAt = { gt: new Date(since) };
+    }
 
     const exercises = await prisma?.exercise.findMany({
-        where: {
-            OR: [
-                { ownerId: userId },  // Exercices de l'utilisateur
-                { isPublic: true }     // Exercices publics
-            ]
-        },
+        where: whereClause,
         include: {
             muscles: {
                 include: {

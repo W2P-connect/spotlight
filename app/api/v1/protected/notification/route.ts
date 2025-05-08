@@ -13,7 +13,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     const whereClause: any = { userId };
 
     if (since) {
-        whereClause.createdAt = { gt: new Date(since) };
+        whereClause.updatedAt = { gt: new Date(since) };
     }
 
     const notifications = await prisma.notification.findMany({

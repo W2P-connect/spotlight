@@ -239,7 +239,7 @@ model PushToken {
   token     String   @unique
   profileId String   @db.Uuid
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
   profile   Profile  @relation(fields: [profileId], references: [id])
 
   @@map("push_token")
@@ -251,7 +251,8 @@ model Notification {
   message     String
   data        Json
   isRead      Boolean          @default(false)
-  createdAt   DateTime         @default(now())
+  createdAt   DateTime         @default(now()) @updatedAt
+  updatedAt   DateTime         @default(now())
   postId      String?          @db.Uuid
   createdBy   String           @db.Uuid
   type        NotificationType

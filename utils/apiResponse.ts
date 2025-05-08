@@ -42,7 +42,7 @@ export async function apiResponse({
 
         let body = null;
         try {
-            body = await req.clone().json();
+            body = await req.json();
         } catch (_) {
             body = null;
         }

@@ -46,9 +46,11 @@ export const PUT = withErrorHandler(async (req: NextRequest) => {
         });
     }
 
-    const parsedMetadata = userMetadataSchema.safeParse(body.metadata);
+    const parsedMetadata = body.metadata
+        ? userMetadataSchema.safeParse(body.metadata)
+        : null;
 
-    if (!parsedMetadata.success) {
+    if (parsedMetadata && !parsedMetadata.success) {
         return apiResponse({
             message: 'Invalid metadata in request body',
             error: parsedMetadata.error.message,
@@ -98,21 +100,23 @@ export const PUT = withErrorHandler(async (req: NextRequest) => {
 
     const updatedProfile = await updateProfileData(userId, firstName ?? profile.firstName, lastName ?? profile.lastName, username ?? profile.username);
 
-    const responseUpdate = await updateUserMetadata(userId, parsedMetadata.data);
+    if (parsedMetadata) {
+        const responseUpdate = await updateUserMetadata(userId, parsedMetadata.data);
 
-    if (!responseUpdate.success) {
-        return apiResponse({
-            message: 'Failed to update user metadata',
-            success: false,
-            status: 500,
-            req: req,
-            log: {
-                message: responseUpdate.error ?? 'Failed to update user metadata',
-                metadata: {
-                    error: responseUpdate,
-                },
-            }
-        });
+        if (!responseUpdate.success) {
+            return apiResponse({
+                message: 'Failed to update user metadata',
+                success: false,
+                status: 500,
+                req: req,
+                log: {
+                    message: responseUpdate.error ?? 'Failed to update user metadata',
+                    metadata: {
+                        error: responseUpdate,
+                    },
+                }
+            });
+        }
     }
     return apiResponse({
         message: 'User updated successfully',
