@@ -1,3 +1,5 @@
+export type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
+
 /**************************** API ***************************/
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
@@ -43,4 +45,23 @@ export interface UserMetadata {
     height?: string;
     weight?: string;
     profil_picture_uri?: string;
+}
+
+/********************************** NOTIFICATIONS **************************/
+
+export type Notification = {
+    id: string
+    type: 'like' | 'comment' | 'generic' | 'follow'
+    message: string
+    data: {
+        userName: string
+        profilePicture: string | null
+        users?: string[]
+        [key: string]: any
+    }
+    isRead: boolean
+    postId: string | null
+    createdAt: Date
+    userId: string
+    createdBy: string
 }

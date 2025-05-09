@@ -22,7 +22,7 @@ const newLikeNotification = async (postId: string, likerId: string) => {
     // Récupérer le profile du liker
     const likerProfile = await prisma.profile.findUnique({
         where: { id: likerId },
-        select: { username: true }
+        select: { username: true, profilePicture: true }
     });
 
     if (!likerProfile?.username) {
@@ -33,8 +33,12 @@ const newLikeNotification = async (postId: string, likerId: string) => {
     // Envoi de la notification avec regroupement géré dans sendPushNotification
     await sendPushNotification(
         ownerId,
+        likerId,
         `${likerProfile.username} a liké votre post`,
-        { userName: likerProfile.username },
+        {
+            userName: likerProfile.username,
+            profilePicture: likerProfile.profilePicture
+        },
         "Nouveau like",
         "like",
         postId

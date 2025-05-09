@@ -1,93 +1,131 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 
-import { createAdminClient } from '@/utils/supabase/admin';
-import { userMetadataSchema } from '@/lib/zod/user';
+import { createAdminClient, updateUserMetadata } from '@/utils/supabase/admin';
+import { isValidName, isValidUsername, userMetadataSchema } from '@/lib/zod/user';
 import { apiResponse } from '@/utils/apiResponse';
+import { getProfileById, updateProfileData } from '@/lib/profile';
+import { withErrorHandler } from '@/utils/errorHandler';
 
-
-export const PUT = async (
-    req: NextRequest,
-) => {
+export const PUT = withErrorHandler(async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string;
-
     const body = await req.json();
-    const parsed = userMetadataSchema.safeParse(body);
 
-    if (!parsed.success) {
-        console.log(parsed.error);
+    const { firstName, lastName, username } = body;
 
-        return NextResponse.json(
-            {
-                message: 'Invalid request body',
-                errors: parsed.error.format(),
-                success: false,
-            },
-            { status: 400 }
-        );
-    }
-    const supabaseAdmin = createAdminClient();
-    try {
-        const { data, error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-            user_metadata: parsed.data,
-        });
-
-        if (error) {
-            return NextResponse.json(
-                {
-                    message: 'Failed to update user metadata',
-                    error: error.message,
-                    success: false,
+    // Vérification basique des longueurs + caractères
+    if (!isValidName(firstName) || !isValidName(lastName)) {
+        return apiResponse({
+            message: 'First name or last name is invalid.',
+            success: false,
+            status: 400,
+            req: req,
+            log: {
+                message: 'First name or last name is invalid.',
+                metadata: {
+                    firstName,
+                    lastName,
                 },
-                { status: 500 }
-            );
-        }
+            }
+        });
+    }
 
-        const { first_name, last_name, username } = parsed.data;
+    if (!isValidUsername(username)) {
+        return apiResponse({
+            message: 'Invalid username. Must be 3-20 characters long and contain only letters, numbers, and underscores.',
+            success: false,
+            status: 400,
+            req: req,
+            log: {
+                message: 'Invalid username. Must be 3-20 characters long and contain only letters, numbers, and underscores.',
+                metadata: {
+                    username,
+                },
+            }
+        });
+    }
 
-        const display_name = `${first_name ?? ''} ${last_name ?? ''} ${username ? `(${username})` : ''}`.trim();
-        const search_value = `${first_name ?? ''} ${last_name ?? ''} ${username ?? ''}`.toLowerCase().trim();
+    const parsedMetadata = body.metadata
+        ? userMetadataSchema.safeParse(body.metadata)
+        : null;
 
-        const { error: profileUpdateError } = await supabaseAdmin
-            .from('profile')
-            .update({
-                display_name,
-                search_value,
-                first_name,
-                last_name,
-                username
-            })
-            .eq('id', userId);
+    if (parsedMetadata && !parsedMetadata.success) {
+        return apiResponse({
+            message: 'Invalid metadata in request body',
+            error: parsedMetadata.error.message,
+            success: false,
+            status: 400,
+            req: req,
+            log: {
+                message: 'Invalid metadata in request body',
+                metadata: {
+                    error: parsedMetadata.error.message,
+                },
+            }
+        });
+    }
+    const profile = await getProfileById(userId);
 
-        if (profileUpdateError) {
+    if (!profile) {
+        return apiResponse({
+            message: 'Profile not found',
+            success: false,
+            status: 404,
+            req: req,
+            log: {
+                message: 'Profile not found',
+                metadata: {
+                    userId,
+                },
+            }
+        });
+    }
+
+    if (profile.username !== username && profile.username && username) {
+        return apiResponse({
+            message: 'Username cannot be changed',
+            success: false,
+            status: 400,
+            req: req,
+            log: {
+                message: 'Username cannot be changed',
+                metadata: {
+                    profileUsername: profile.username,
+                    newUsername: username,
+                },
+            }
+        });
+    }
+
+    const updatedProfile = await updateProfileData(userId, firstName ?? profile.firstName, lastName ?? profile.lastName, username ?? profile.username);
+
+    if (parsedMetadata) {
+        const responseUpdate = await updateUserMetadata(userId, parsedMetadata.data);
+
+        if (!responseUpdate.success) {
             return apiResponse({
-                message: 'User metadata updated but failed to update values in profile table',
-                error: profileUpdateError.message,
+                message: 'Failed to update user metadata',
                 success: false,
-                status: 500
+                status: 500,
+                req: req,
+                log: {
+                    message: responseUpdate.error ?? 'Failed to update user metadata',
+                    metadata: {
+                        error: responseUpdate,
+                    },
+                }
             });
         }
-
-        return apiResponse({
-            message: 'User metadata updated successfully',
-            data: data.user?.user_metadata,
-            success: true,
-        });
-
-    } catch (error: any) {
-        console.error('Error updating user metadata:', error);
-        return apiResponse({
-            message: 'An unexpected error occurred',
-            error: error.message,
-            success: false,
-            status: 500
-        });
     }
+    return apiResponse({
+        message: 'User updated successfully',
+        data: updatedProfile,
+        success: true,
+    });
+});
 
-};
-
-export const GET = async (req: NextRequest) => {
+export const GET = withErrorHandler(async (req: NextRequest) => {
     const supabaseAdmin = createAdminClient();
 
     const user_id = req.headers.get("x-user-id") as string;
@@ -101,35 +139,24 @@ export const GET = async (req: NextRequest) => {
         });
     }
 
-    try {
-        const { data, error } = await supabaseAdmin
-            .from('profile')
-            .select('id, display_name, profil_picture, first_name, last_name, username')
-            .ilike('search_value', `%${query}%`)
-            .limit(10);
+    const { data, error } = await supabaseAdmin
+        .from('profile')
+        .select('id, display_name, profil_picture, first_name, last_name, username')
+        .ilike('search_value', `%${query}%`)
+        .limit(10);
 
-        if (error) {
-            return apiResponse({
-                message: 'Failed to fetch users',
-                error: error.message,
-                success: false,
-                status: 500
-            });
-        }
-
+    if (error) {
         return apiResponse({
-            message: 'Users fetched successfully',
-            data: data.filter((user) => user.id !== user_id),
-            success: true,
-        });
-
-    } catch (error: any) {
-        console.error('Error fetching users:', error);
-        return apiResponse({
-            message: 'An unexpected error occurred',
+            message: 'Failed to fetch users',
             error: error.message,
             success: false,
             status: 500
         });
     }
-};
+
+    return apiResponse({
+        message: 'Users fetched successfully',
+        data: data.filter((user) => user.id !== user_id),
+        success: true,
+    });
+});

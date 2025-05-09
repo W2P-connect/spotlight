@@ -1,16 +1,21 @@
 import { Expo, ExpoPushMessage } from 'expo-server-sdk';
 import { prisma } from '@/lib/prisma';
-import { NOTIFICATION_GROUPING_WINDOW_MS } from '@/constantes';
+import { FOLLOW_SPAM_WINDOW_MS, NOTIFICATION_GROUPING_WINDOW_MS } from '@/constantes';
+import { Notification } from '@/types';
 
 const expo = new Expo();
 
 type NotificationData = {
     userName: string;
+    profilePicture: string | null;
     [key: string]: any;
 };
 
+type NotificationType = 'like' | 'comment' | 'generic' | 'follow'
+
 export function sendPushNotification(
     userId: string,
+    createdBy: string,
     message: string,
     data: NotificationData,
     title: string,
@@ -20,6 +25,7 @@ export function sendPushNotification(
 
 export function sendPushNotification(
     userId: string,
+    createdBy: string,
     message: string,
     data: NotificationData,
     title?: string,
@@ -29,14 +35,21 @@ export function sendPushNotification(
 // Implémentation
 export async function sendPushNotification(
     userId: string,
+    createdBy: string,
     message: string,
     data: NotificationData,
     title: string = "",
-    type: "like" | "comment" | "generic" | "follow" = "generic",
+    type: NotificationType = "generic",
     postId?: string
 ): Promise<void> {
     if ((type === "like" || type === "comment") && !postId) {
         throw new Error(`postId is required for notification type '${type}'`);
+    }
+
+    //ANTISPAM
+    if (!(await shouldSendNotification(userId, postId, createdBy, type))) {
+        console.log("Spam detected, nothing to do.");
+        return;
     }
 
     let dbNotification;
@@ -83,6 +96,7 @@ export async function sendPushNotification(
                         users: [data.userName],
                     },
                     postId,
+                    createdBy
                 },
             });
         }
@@ -95,6 +109,7 @@ export async function sendPushNotification(
                 message,
                 data,
                 postId,
+                createdBy
             },
         });
     }
@@ -119,9 +134,10 @@ export async function sendPushNotification(
             return;
         }
 
-        const enrichedData = {
-            ...data,
-            dbNotification: dbNotification,
+        const enrichedData: Notification = {
+            ...dbNotification,
+            data
+
         };
 
         const notification: ExpoPushMessage = {
@@ -158,4 +174,52 @@ export async function sendPushNotification(
             console.error('Error while sending push notifications:', error);
         }
     }
+};
+
+export const shouldSendNotification = async (
+    userId: string,
+    postId: string | undefined,
+    createdBy: string,
+    type: NotificationType
+): Promise<boolean> => {
+    if (type === "like" || type === "comment") {
+        if (!postId) {
+            console.warn(`postId is required for notification type '${type}'`);
+            return false;
+        }
+
+        const existingNotif = await prisma.notification.findFirst({
+            where: {
+                userId,
+                postId,
+                type,
+                createdBy,
+                createdAt: {
+                    gte: new Date(Date.now() - NOTIFICATION_GROUPING_WINDOW_MS)
+                }
+            }
+        });
+
+        if (existingNotif) {
+            return false;
+        }
+    }
+
+    if (type === "follow") {
+        const existingFollowNotif = await prisma.notification.findFirst({
+            where: {
+                userId,
+                type: "follow",
+                createdBy,
+                createdAt: {
+                    gte: new Date(Date.now() - FOLLOW_SPAM_WINDOW_MS)
+                }
+            }
+        });
+
+        if (existingFollowNotif) {
+            return false;
+        }
+    }
+    return true;
 };

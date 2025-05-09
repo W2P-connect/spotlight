@@ -6,60 +6,48 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { workoutHistoryExerciseSchema } from '@/lib/zod/history';
 import { log } from 'console';
+import { withErrorHandler } from '@/utils/errorHandler';
+import { apiResponse } from '@/utils/apiResponse';
 
-export const POST = async (req: NextRequest) => {
-    try {
-        const body = await req.json();
-        const parsedBody = workoutHistoryExerciseSchema.parse(body);
-        const userId = req.headers.get("x-user-id") as string;
+export const POST = withErrorHandler(async (req: NextRequest) => {
+    const body = await req.json();
+    const parsedBody = workoutHistoryExerciseSchema.parse(body);
+    const userId = req.headers.get("x-user-id") as string;
 
-        const workoutHistory = await prisma.workoutHistory.findUnique({
-            where: {
-                id: parsedBody.workoutHistoryId,
-                ownerId: userId
-            },
-            select: { ownerId: true },
-        });
+    const workoutHistory = await prisma.workoutHistory.findUnique({
+        where: {
+            id: parsedBody.workoutHistoryId,
+            ownerId: userId
+        },
+        select: { ownerId: true },
+    });
 
-        if (!workoutHistory) {
-            return NextResponse.json({
+    if (!workoutHistory) {
+        return apiResponse({
+            message: "Workout history not found",
+            success: false,
+            status: 404,
+            req: req,
+            log: {
                 message: "Workout history not found",
-                success: false,
-            }, { status: 404 });
-        }
-
-        const newWorkoutHistoryExercise = await prisma.workoutHistoryExercise.create({
-            data: {
-                ...parsedBody,
+                metadata: {
+                    userId,
+                    historyId: parsedBody.workoutHistoryId,
+                },
             }
         });
-
-        return NextResponse.json({
-            message: "Successfully created history exercise",
-            data: newWorkoutHistoryExercise,
-            success: true,
-        }, { status: 201 });
-
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return NextResponse.json({
-                message: "Validation error",
-                errors: error.errors,
-                success: false,
-            }, { status: 400 });
-        }
-
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            console.log(error.message);
-            return NextResponse.json({
-                message: `Database error: ${error.message}`,
-                success: false,
-            }, { status: 500 });
-        }
-
-        return NextResponse.json({
-            message: "Failed to create history exercise",
-            success: false,
-        }, { status: 500 });
     }
-};
+
+    const newWorkoutHistoryExercise = await prisma.workoutHistoryExercise.create({
+        data: {
+            ...parsedBody,
+        }
+    });
+
+    return apiResponse({
+        message: "Successfully created history exercise",
+        data: newWorkoutHistoryExercise,
+        success: true,
+        status: 201
+    });
+});

@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { apiResponse } from "@/utils/apiResponse";
 import { toggleCommentLike } from "@/lib/post/utils";
+import { logWarning, withErrorHandler } from "@/utils/errorHandler";
 
-export const PUT = async (
+export const PUT = withErrorHandler(async (
     req: NextRequest,
     { params }: { params: Promise<{ commentId: string }> }
 ) => {
@@ -15,7 +16,14 @@ export const PUT = async (
         return apiResponse({
             message: result.message,
             error: result.error,
-            success: false
+            success: false,
+            req: req,
+            log: {
+                message: result.message ?? "Failed to toggle comment like",
+                metadata: {
+                    result,
+                },
+            }
         });
     }
 
@@ -23,4 +31,4 @@ export const PUT = async (
         message: `Comment successfully ${result.message}`,
         success: true
     });
-};
+});

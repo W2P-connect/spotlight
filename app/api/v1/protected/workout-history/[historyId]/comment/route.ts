@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
 import { apiResponse } from "@/utils/apiResponse";
 import { createComment, getComments } from "@/lib/post/utils";
+import { withErrorHandler } from "@/utils/errorHandler";
+import { removeUndefined, safeStringify } from "@/utils/utils";
 
-export const POST = async (
+export const POST = withErrorHandler(async (
     req: NextRequest,
     { params }: { params: Promise<{ historyId: string }> }
 ) => {
@@ -27,7 +29,14 @@ export const POST = async (
         return apiResponse({
             message: result.message,
             error: result.error,
-            success: false
+            success: false,
+            req: req,
+            log: {
+                message: result.message ?? "Failed to create comment",
+                metadata: {
+                    result: safeStringify(result),
+                },
+            }
         });
     }
 
@@ -36,9 +45,9 @@ export const POST = async (
         data: result.data,
         success: true
     });
-};
+});
 
-export const GET = async (
+export const GET = withErrorHandler(async (
     req: NextRequest,
     { params }: { params: Promise<{ historyId: string }> }
 ) => {
@@ -51,15 +60,20 @@ export const GET = async (
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    console.log("-------> historyId", historyId);
-
     const result = await getComments(user_id, historyId, limit, offset);
 
     if (!result.success) {
         return apiResponse({
             message: result.message,
             error: result.error,
-            success: false
+            success: false,
+            req: req,
+            log: {
+                message: result.message ?? "Failed to fetch comments",
+                metadata: {
+                    result: safeStringify(result),
+                },
+            }
         });
     }
 
@@ -68,5 +82,5 @@ export const GET = async (
         data: result.data,
         success: true
     });
-};
+});
 

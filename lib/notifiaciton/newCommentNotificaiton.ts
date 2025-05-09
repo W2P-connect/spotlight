@@ -23,7 +23,7 @@ export const newCommentNotification = async (postId: string, commenterId: string
     // Récupérer le profile du commentateur pour afficher son username dans la notif
     const commenterProfile = await prisma.profile.findUnique({
         where: { id: commenterId },
-        select: { username: true }
+        select: { username: true, profilePicture: true }
     });
 
     if (!commenterProfile?.username) {
@@ -33,8 +33,12 @@ export const newCommentNotification = async (postId: string, commenterId: string
     // Envoi de la notification
     await sendPushNotification(
         ownerId,
+        commenterId,
         `${commenterProfile.username} a commenté votre post`,
-        { userName: commenterProfile.username },
+        {
+            userName: commenterProfile.username,
+            profilePicture: commenterProfile.profilePicture
+        },
         "Nouveau commentaire",
         "comment",
         postId

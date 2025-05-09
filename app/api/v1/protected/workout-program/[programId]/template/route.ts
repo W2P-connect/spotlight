@@ -4,81 +4,65 @@ import { z } from "zod";
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { withErrorHandler } from "@/utils/errorHandler";
+import { workoutTemplateLinkSchema } from "@/lib/zod/template";
+import { apiResponse } from "@/utils/apiResponse";
+import { removeUndefined, safeStringify } from "@/utils/utils";
 
-export const POST = async (req: NextRequest) => {
-    try {
-        const workoutTemplateLinkSchema = z.object({
-            id: z.string().uuid().optional(),
-            workoutProgramId: z.string().uuid(),
-            workoutTemplateId: z.string().uuid(),
-            order: z.number().int().nonnegative().default(1),
-            createdAt: z.coerce.date().optional(),
-            updatedAt: z.coerce.date().optional(),
-        });
+export const POST = withErrorHandler(async (req: NextRequest) => {
+    const userId = req.headers.get("x-user-id") as string;
 
-        const userId = req.headers.get("x-user-id") as string;
+    const body = await req.json();
+    const parsedData = workoutTemplateLinkSchema.safeParse(body);
 
-        const body = await req.json();
-        const parsedData = workoutTemplateLinkSchema.safeParse(body);
-
-        if (!parsedData.success) {
-            console.error(parsedData.error);
-            return NextResponse.json({
-                message: 'Invalid request body',
-                errors: parsedData.error.format(),
-                success: false,
-            }, { status: 400 });
-        }
-
-
-        const [program, template] = await Promise.all([
-            await prisma.workoutProgram.findFirst({
-                where: {
-                    id: parsedData.data.workoutProgramId,
-                    ownerId: userId
-                }
-            }),
-            await prisma.workoutTemplate.findFirst({
-                where: {
-                    id: parsedData.data.workoutTemplateId,
-                    ownerId: userId
-                }
-            })
-        ])
-
-        if (!program || !template) {
-            console.error("Program or template not found");
-            return NextResponse.json({
-                message: "Not authorized",
-                errors: {},
-                success: false,
-            }, { status: 400 });
-        }
-
-        // Création du lien entre le programme et la séance
-        const newWorkoutTemplateLink = await prisma.workoutProgramWorkoutTemplate.create({
-            data: parsedData.data
-        });
-
-        return NextResponse.json({
-            message: "Successfully created workout program",
-            data: newWorkoutTemplateLink,
-            success: true,
-        }, { status: 201 });
-
-    } catch (error) {
-        console.error(error);
-
-        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            return NextResponse.json({
-                message: `Database error: ${error.message}`,
-                success: false,
-            }, { status: 500 });
-        }
-
-        return NextResponse.json({
-            message: "Failed to link template",
+    if (!parsedData.success) {
+        console.error(parsedData.error);
+        return apiResponse({
+            message: 'Invalid request body',
             success: false,
-        }, { status: 500 });
+            req: req,
+            log: {
+                message: 'Invalid request body',
+                metadata: {
+                    body,
+                    error: parsedData.error.message,
+                    parsedBodyData: removeUndefined(parsedData.data),
+                    parsedBodyError: safeStringify(parsedData.error),
+                },
+            }
+        });
     }
-};
+
+    const [program, template] = await prisma.$transaction([
+        prisma.workoutProgram.findFirst({
+            where: {
+                id: parsedData.data.workoutProgramId,
+                ownerId: userId
+            }
+        }),
+        prisma.workoutTemplate.findFirst({
+            where: {
+                id: parsedData.data.workoutTemplateId,
+                ownerId: userId
+            }
+        })
+    ])
+
+    if (!program || !template) {
+        console.error("Program or template not found");
+        return apiResponse({
+            message: "Not authorized",
+            success: false,
+        });
+    }
+
+    const newWorkoutTemplateLink = await prisma.workoutProgramWorkoutTemplate.create({
+        data: parsedData.data,
+    });
+
+    return apiResponse({
+        message: "Successfully created workout program",
+        data: newWorkoutTemplateLink,
+        success: true,
+    });
+});
