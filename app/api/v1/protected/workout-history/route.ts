@@ -1,13 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from "zod";
-import { Prisma } from '@prisma/client';
 import { workoutHistoryExerciseSchema, workoutHistorySchema } from '@/lib/zod/history';
 import { apiResponse } from '@/utils/apiResponse';
 import { withErrorHandler } from '@/utils/errorHandler';
-import { createClient } from '@/utils/supabase/server';
 import { safeStringify } from '@/utils/utils';
 import { createAdminClient } from '@/utils/supabase/admin';
 
@@ -16,6 +14,7 @@ export const GET = (async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string;
     const searchParams = req.nextUrl.searchParams;
 
+    const since = searchParams.get('since');
     // Récupération des filtres
     const workoutTemplateId = searchParams.get('workoutTemplateId');
     const workoutProgramId = searchParams.get('workoutProgramId');
@@ -41,6 +40,11 @@ export const GET = (async (req: NextRequest) => {
             }
         };
     }
+    if (since) {
+        whereClause.updatedAt = {
+            gt: new Date(since)
+        }
+    }
 
     const workoutHistory = await prisma?.workoutHistory.findMany({
         where: whereClause,
@@ -58,7 +62,6 @@ export const GET = (async (req: NextRequest) => {
     if (!workoutHistory) {
         return apiResponse({
             message: 'No Workout History found',
-            data: [],
             success: false,
         });
     }

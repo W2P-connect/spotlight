@@ -11,9 +11,19 @@ import { removeUndefined, safeStringify } from '@/utils/utils';
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string //From middleware;
+
+    const searchParams = req.nextUrl.searchParams;
+    const since = searchParams.get('since');
+
     const whereClause: any = {
         ownerId: userId
     };
+
+    if (since) {
+        whereClause.updatedAt = {
+            gt: new Date(since)
+        }
+    }
 
     const workoutPrograms = await prisma.workoutProgram.findMany({
         where: whereClause,
@@ -35,6 +45,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
             status: 404
         });
     }
+
+    console.log("workoutPrograms", workoutPrograms.length);
+
 
     return apiResponse({
         message: 'Successfully retrieved workout programs',

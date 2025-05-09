@@ -9,6 +9,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string //From middleware;
     const searchParams = req.nextUrl.searchParams;
 
+    const since = searchParams.get('since');
     const workoutTemplateId = searchParams.get('workoutTemplateId');
     const workoutProgramId = searchParams.get('workoutProgramId');
     const sortOrder = searchParams.get('date') || 'newest';
@@ -24,6 +25,12 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
             some: {
                 id: workoutProgramId
             }
+        }
+    }
+
+    if (since) {
+        whereClause.updatedAt = {
+            gt: new Date(since)
         }
     }
 
