@@ -57,6 +57,7 @@ model WorkoutProgram {
   id        String    @id @default(uuid()) @db.Uuid
   index     Int       @unique @default(autoincrement())
   name      String
+  color     String? 
   startDate DateTime?
   endDate   DateTime?
   ownerId   String    @db.Uuid
@@ -250,6 +251,7 @@ model Muscle {
 model MuscleGroup {
   id      String   @id @default(uuid()) @db.Uuid
   name    String
+  order   Int     
   muscles Muscle[]
 
   @@map("muscle_group")
