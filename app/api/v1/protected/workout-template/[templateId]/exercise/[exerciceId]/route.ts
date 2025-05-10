@@ -110,7 +110,7 @@ export const DELETE = withErrorHandler(async (
         });
 
         return apiResponse({
-            message: 'Successfully updated workoutTemplateExercice',
+            message: 'Successfully deleted workoutTemplateExercice',
             data: exercice,
             success: true,
             status: 200,
@@ -120,17 +120,7 @@ export const DELETE = withErrorHandler(async (
         if (error.code === 'P2025') {
             return apiResponse({
                 message: 'workoutTemplateExercise not found',
-                success: false,
-                status: 404,
-                req: req,
-                log: {
-                    message: 'workoutTemplateExercise not found',
-                    internalError: error,
-                    metadata: {
-                        templateId,
-                        exerciceId
-                    }
-                }
+                success: true,
             });
         }
         throw error;

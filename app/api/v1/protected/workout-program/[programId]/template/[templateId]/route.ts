@@ -92,18 +92,28 @@ export const DELETE = withErrorHandler(async (
         });
     }
 
-    // Suppression de la relation entre le programme et le template
-    await prisma.workoutProgramWorkoutTemplate.delete({
-        where: {
-            workoutProgramId_workoutTemplateId: {
-                workoutProgramId: programId,
-                workoutTemplateId: templateId
-            } 
-        }
-    });
+    try {
+        await prisma.workoutProgramWorkoutTemplate.delete({
+            where: {
+                workoutProgramId_workoutTemplateId: {
+                    workoutProgramId: programId,
+                    workoutTemplateId: templateId
+                }
+            }
+        });
 
-    return apiResponse({
-        message: 'Successfully removed template from program',
-        success: true,
-    });
+        return apiResponse({
+            message: 'Successfully removed template from program',
+            success: true,
+        });
+        
+    } catch (error: any) {
+        if (error.code === 'P2025') {
+            return apiResponse({
+                message: 'Program or template not found',
+                success: true,
+            });
+        }
+        throw error;
+    }
 });

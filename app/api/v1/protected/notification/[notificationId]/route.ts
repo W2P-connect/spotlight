@@ -9,13 +9,24 @@ export const DELETE = withErrorHandler(async (
 ) => {
     const { notificationId } = await params;
 
-    await prisma.notification.delete({
-        where: { id: notificationId },
-    });
+    try {
+        await prisma.notification.delete({
+            where: { id: notificationId },
+        });
 
-    return apiResponse({
-        message: 'Notification deleted successfully',
-        data: null,
-        success: true,
-    });
+        return apiResponse({
+            message: 'Notification deleted successfully',
+            data: null,
+            success: true,
+        });
+
+    } catch (error: any) {
+        if (error.code === 'P2025') {
+            return apiResponse({
+                message: 'Notification deleted successfully',
+                success: true,
+            });
+        }
+        throw error
+    }
 })

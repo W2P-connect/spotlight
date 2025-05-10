@@ -15,16 +15,29 @@ export const DELETE = withErrorHandler(async (
 
     const { programId } = await params
 
-    await prisma.workoutProgram.delete({
-        where: {
-            id: programId,
-            ownerId: userId,
+    try {
+        await prisma.workoutProgram.delete({
+            where: {
+                id: programId,
+                ownerId: userId,
+            }
+        })
+
+        return apiResponse({
+            message: "Succesfully deleted",
+            success: true,
+        })
+
+    } catch (error: any) {
+        if (error.code === 'P2025') {
+            //L'entité n'existe déjà plsu dans la bdd
+            return apiResponse({
+                message: "Succesfully deleted",
+                success: true,
+            })
         }
-    })
-    return apiResponse({
-        message: "Succesfully deleted",
-        success: true,
-    })
+        throw error
+    }
 });
 
 export const PUT = withErrorHandler(async (

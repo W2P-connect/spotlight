@@ -73,18 +73,30 @@ export const DELETE = withErrorHandler(async (
             success: false,
         });
     }
-    const deleted = await prisma.workoutHistoryExercise.delete({
-        where: {
-            id: id,
-            workoutHistory: {
-                ownerId: userId
-            }
-        },
-    });
 
-    return apiResponse({
-        message: 'Successfully deleted workout history exercise',
-        data: deleted,
-        success: true,
-    });
+    try {
+        await prisma.workoutHistoryExercise.delete({
+            where: {
+                id: id,
+                workoutHistory: {
+                    ownerId: userId
+                }
+            },
+        });
+
+
+        return apiResponse({
+            message: 'Successfully deleted workout history exercise',
+            success: true,
+        });
+
+    } catch (error: any) {
+        if (error.code === 'P2025') {
+            return apiResponse({
+                message: 'Workout history exercise not found or does not belong to the user',
+                success: true,
+            });
+        }
+        throw error;
+    }
 });

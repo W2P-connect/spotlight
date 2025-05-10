@@ -84,22 +84,26 @@ export const DELETE = withErrorHandler(async (
 
   const { historyId } = await params;
 
-  const deleted = await prisma.workoutHistory.delete({
-    where: {
-      id: historyId,
-      ownerId: userId,
-    },
-  });
-
-  if (!deleted) {
-    return apiResponse({
-      message: 'Workout history not found or does not belong to the user',
-      success: false,
+  try {
+    await prisma.workoutHistory.delete({
+      where: {
+        id: historyId,
+        ownerId: userId,
+      },
     });
-  }
 
-  return apiResponse({
-    message: 'Successfully deleted workout history',
-    success: true,
-  });
+    return apiResponse({
+      message: 'Successfully deleted workout history',
+      success: true,
+    });
+
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return apiResponse({
+        message: 'Workout history not found or does not belong to the user',
+        success: true,
+      });
+    }
+    throw error;
+  }
 });

@@ -32,16 +32,7 @@ export const DELETE = withErrorHandler(async (
         if (error.code === 'P2025') {
             return apiResponse({
                 message: 'workoutTemplate not found',
-                success: false,
-                status: 404,
-                req: req,
-                log: {
-                    message: 'workoutTemplate not found',
-                    metadata: {
-                        templateId,
-                        userId,
-                    },
-                }
+                success: true,
             });
         }
         throw error;
