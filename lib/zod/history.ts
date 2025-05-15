@@ -5,7 +5,7 @@ export const workoutHistoryExerciseSchema = z.object({
     workoutHistoryId: z.string().uuid(),
     exerciseId: z.string().uuid(),
     comment: z.string(),
-    nbReps: z.array(z.number().int().nonnegative()),
+    nbReps: z.array(z.number().nonnegative()),
     weight: z.array(z.number().nonnegative()),
     minReps: z.array(z.number().int().nonnegative()),
     maxReps: z.array(z.number().int().nonnegative()),
@@ -19,7 +19,7 @@ export const workoutHistoryExerciseSchema = z.object({
 export const updateWorkoutHistoryExerciseSchema = z.object({
     order: z.number().nonnegative().optional(),
     nbReps: z.array(z.number().int().positive()).optional(),
-    weight: z.array(z.number().nonnegative()).optional(),
+    weight: z.array(z.number()).optional(),
     comment: z.string().nullable().optional(),
     restTime: z.array(z.number().int().nonnegative()).optional(),
     supersetId: z.string().uuid().nullable().optional(),
@@ -35,7 +35,7 @@ export const workoutHistorySchema = z.object({
     name: z.string().default("Séance libre"),
     duration: z.number().int().nonnegative().default(0),
     comment: z.string().nullable().optional(),
-    isPublic: z.boolean().default(false),
+    isPublic: z.boolean().optional(),
     workoutPlace: z.string().nullable().optional(),
 }).strip();
 

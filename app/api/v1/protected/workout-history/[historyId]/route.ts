@@ -41,6 +41,7 @@ export const PUT = withErrorHandler(async (
       }
     });
   }
+  console.log("parsedBody.data", parsedBody.data);
 
   try {
     const workoutHistory = await prisma.workoutHistory.update({

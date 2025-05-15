@@ -183,7 +183,7 @@ model WorkoutHistoryExercise {
   id               String         @id @default(uuid()) @db.Uuid
   workoutHistoryId String         @db.Uuid
   exerciseId       String         @db.Uuid
-  nbReps           Int[]
+  nbReps           Float[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @default(now()) @updatedAt
   weight           Float[]
