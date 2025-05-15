@@ -7,8 +7,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string;
 
     const searchParams = req.nextUrl.searchParams
-    const limit = parseInt(searchParams.get('limit') || '5');
+    const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
+    const since = searchParams.get('since');
 
     if (!userId) {
         return apiResponse({
