@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import sanitizeHtml from 'sanitize-html';
-import newCommentNotification from "../notifiaciton/newCommentNotificaiton";
+import { newCommentNotification, newCommentReplyNotification } from "../notifiaciton/newCommentNotificaiton";
 import newLikeNotification from "../notifiaciton/newLikeNotification ";
 
 
@@ -113,9 +113,9 @@ export async function createComment(userId: string, postId: string, content: str
         });
 
         if (parentId) {
-            //notification réponse            
+            newCommentReplyNotification(postId, userId, parentId)
         } else {
-            newCommentNotification(postId, userId)
+            newCommentNotification(postId, userId);
         }
 
         if (!parentId) {

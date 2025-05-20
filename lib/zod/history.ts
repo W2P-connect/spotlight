@@ -18,7 +18,7 @@ export const workoutHistoryExerciseSchema = z.object({
 
 export const updateWorkoutHistoryExerciseSchema = z.object({
     order: z.number().nonnegative().optional(),
-    nbReps: z.array(z.number().int().positive()).optional(),
+    nbReps: z.array(z.number().positive()).optional(),
     weight: z.array(z.number()).optional(),
     comment: z.string().nullable().optional(),
     restTime: z.array(z.number().int().nonnegative()).optional(),
