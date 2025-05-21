@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { CallApiError, CallApiResponse, HTTPMethod } from "@/types";
+import sanitizeHtml from 'sanitize-html';
 
 /**
  * Redirects to a specified path with an encoded message as a query parameter.
@@ -117,4 +118,11 @@ export function safeStringify(value: unknown): string {
     } catch {
         return `"Unserializable value"`;
     }
+}
+
+export const cleanComment = (comment: string) => {
+    return sanitizeHtml(comment, {
+        allowedTags: [],      // Aucun tag HTML autorisé
+        allowedAttributes: {} // Aucune attribut autorisé
+    });
 }

@@ -16,10 +16,13 @@ export const DELETE = withErrorHandler(async (
     const { programId } = await params
 
     try {
-        await prisma.workoutProgram.delete({
+        await prisma.workoutProgram.update({
             where: {
                 id: programId,
                 ownerId: userId,
+            },
+            data: {
+                deletedAt: new Date()
             }
         })
 

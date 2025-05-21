@@ -15,11 +15,12 @@ export const DELETE = withErrorHandler(async (
     const { templateId } = await params
 
     try {
-        await prisma.workoutTemplate.delete({
+        await prisma.workoutTemplate.update({
             where: {
                 ownerId: userId,
                 id: templateId
-            }
+            },
+            data: { deletedAt: new Date() }
         });
 
         return apiResponse({

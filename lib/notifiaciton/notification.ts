@@ -14,7 +14,7 @@ type NotificationData = {
 type NotificationType = 'like' | 'comment' | 'generic' | 'follow'
 
 export function sendPushNotification(
-    userId: string,
+    toUserId: string,
     createdBy: string,
     message: string,
     data: NotificationData,
@@ -24,7 +24,7 @@ export function sendPushNotification(
 ): Promise<void>;
 
 export function sendPushNotification(
-    userId: string,
+    toUserId: string,
     createdBy: string,
     message: string,
     data: NotificationData,
@@ -34,7 +34,7 @@ export function sendPushNotification(
 
 // Implémentation
 export async function sendPushNotification(
-    userId: string,
+    toUserId: string,
     createdBy: string,
     message: string,
     data: NotificationData,
@@ -47,7 +47,7 @@ export async function sendPushNotification(
     }
 
     //ANTISPAM
-    if (!(await shouldSendNotification(userId, postId, createdBy, type))) {
+    if (!(await shouldSendNotification(toUserId, postId, createdBy, type))) {
         console.log("Spam detected, nothing to do.");
         return;
     }
@@ -58,7 +58,7 @@ export async function sendPushNotification(
     if ((type === 'like' || type === 'comment') && postId) {
         const existingNotif = await prisma.notification.findFirst({
             where: {
-                userId,
+                userId: toUserId,
                 postId,
                 type,
                 createdAt: {
@@ -88,7 +88,7 @@ export async function sendPushNotification(
         } else {
             dbNotification = await prisma.notification.create({
                 data: {
-                    userId,
+                    userId: toUserId,
                     type,
                     message,
                     data: {
@@ -104,7 +104,7 @@ export async function sendPushNotification(
         // Cas générique
         dbNotification = await prisma.notification.create({
             data: {
-                userId,
+                userId: toUserId,
                 type,
                 message,
                 data,
@@ -115,11 +115,12 @@ export async function sendPushNotification(
     }
 
     const tokens = await prisma.pushToken.findMany({
-        where: { profileId: userId },
+        where: { profileId: toUserId },
     });
 
     if (tokens.length === 0) {
-        console.log(`No push tokens found for user ${userId}`);
+        process.env.NODE_ENV === "development" &&
+            console.log(`No push tokens found for user ${toUserId}`);
         return;
     }
 
@@ -170,6 +171,8 @@ export async function sendPushNotification(
                     }
                 }
             });
+
+            console.log("success sending push notifications", ticketChunk.map((ticket) => ticket.status));
         } catch (error) {
             console.error('Error while sending push notifications:', error);
         }

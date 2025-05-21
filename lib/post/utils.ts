@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import sanitizeHtml from 'sanitize-html';
 import { newCommentNotification, newCommentReplyNotification } from "../notifiaciton/newCommentNotificaiton";
 import newLikeNotification from "../notifiaciton/newLikeNotification ";
+import { cleanComment } from "@/utils/utils";
 
 
 export async function toggleLike(userId: string, postId: string) {
@@ -86,15 +86,13 @@ export async function createComment(userId: string, postId: string, content: str
             }
         }
 
-        const cleanContent = sanitizeHtml(content, {
-            allowedTags: [],      // Aucun tag HTML autorisé
-            allowedAttributes: {} // Aucune attribut autorisé
-        });
+        const cleanContent = cleanComment(content);
 
         if (!cleanContent) {
             return { message: "Invalid comment content.", error: "InvalidContent", success: false };
         }
 
+        //TODO => formalise la length
         if (cleanContent.length > 2200) {
             return {
                 message: "Invalid comment content: limite max autorisée à 2 200 caractères.",
@@ -113,8 +111,11 @@ export async function createComment(userId: string, postId: string, content: str
         });
 
         if (parentId) {
+            console.log("newCommentReplyNotification");
             newCommentReplyNotification(postId, userId, parentId)
         } else {
+            console.log("newCommentNotification");
+            
             newCommentNotification(postId, userId);
         }
 

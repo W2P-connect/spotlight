@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { apiResponse } from "@/utils/apiResponse";
 import { withErrorHandler } from "@/utils/errorHandler";
 import { prisma } from "@/lib/prisma";
-import sanitizeHtml from 'sanitize-html';
+import { cleanComment } from "@/utils/utils";
 
 export const PUT = withErrorHandler(async (
     req: NextRequest,
@@ -14,10 +14,7 @@ export const PUT = withErrorHandler(async (
     const body = await req.json();
     const { content } = body;
 
-    const cleanContent = sanitizeHtml(content, {
-        allowedTags: [],      // Aucun tag HTML autorisé
-        allowedAttributes: {} // Aucune attribut autorisé
-    });
+    const cleanContent = cleanComment(content);
 
     if (!cleanContent || cleanContent.trim() === "") {
         return apiResponse({

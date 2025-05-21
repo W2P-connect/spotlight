@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { updateWorkoutHistorySchema } from '@/lib/zod/history';
 import { withErrorHandler } from '@/utils/errorHandler';
@@ -86,10 +86,13 @@ export const DELETE = withErrorHandler(async (
   const { historyId } = await params;
 
   try {
-    await prisma.workoutHistory.delete({
+    await prisma.workoutHistory.update({
       where: {
         id: historyId,
         ownerId: userId,
+      },
+      data: {
+        deletedAt: new Date()
       },
     });
 

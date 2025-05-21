@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { sendPushNotification } from './notification';
+import { env } from 'process';
 
 export const newCommentNotification = async (postId: string, commenterId: string) => {
 
@@ -27,6 +28,8 @@ export const newCommentNotification = async (postId: string, commenterId: string
     });
 
     if (!commenterProfile?.username) {
+        process.env.NODE_ENV === "development"
+            && console.error(`Username not found for commenter ${commenterId}`);
         return;
     }
 
@@ -67,8 +70,6 @@ export const newCommentReplyNotification = async (postId: string, commenterId: s
         return;
     }
 
-    const ownerId = post.ownerId;
-
     // Optionnel : éviter d'envoyer une notif si l'auteur du commentaire est aussi le propriétaire du commentaire parent
     if (parentMessage.userId === commenterId) {
         return;
@@ -86,7 +87,7 @@ export const newCommentReplyNotification = async (postId: string, commenterId: s
 
     // Envoi de la notification
     await sendPushNotification(
-        ownerId,
+        parentMessage.userId,
         commenterId,
         `${commenterProfile.username} a répondu à votre commentaire`,
         {

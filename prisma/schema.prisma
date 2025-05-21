@@ -52,15 +52,17 @@ model Follow {
 }
 
 model WorkoutProgram {
-  id                   String                          @id @default(uuid()) @db.Uuid
-  name                 String
-  color                String?
-  startDate            DateTime?
-  endDate              DateTime?
-  ownerId              String                          @db.Uuid
-  createdAt            DateTime                        @default(now())
-  updatedAt            DateTime                        @default(now()) @updatedAt
-  index                Int                             @unique @default(autoincrement())
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  color     String?
+  startDate DateTime?
+  endDate   DateTime?
+  ownerId   String    @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  deletedAt DateTime?
+  index     Int       @unique @default(autoincrement())
+
   workoutHistory       WorkoutHistory[]
   owner                Profile                         @relation(fields: [ownerId], references: [id])
   workoutTemplateLinks WorkoutProgramWorkoutTemplate[]
@@ -69,11 +71,13 @@ model WorkoutProgram {
 }
 
 model WorkoutTemplate {
-  id                  String                          @id @default(uuid()) @db.Uuid
-  name                String
-  ownerId             String                          @db.Uuid
-  createdAt           DateTime                        @default(now())
-  updatedAt           DateTime                        @default(now()) @updatedAt
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  ownerId   String    @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  deletedAt DateTime?
+
   workoutHistory      WorkoutHistory[]
   workoutProgramLinks WorkoutProgramWorkoutTemplate[]
   owner               Profile                         @relation(fields: [ownerId], references: [id])
@@ -89,6 +93,7 @@ model WorkoutHistory {
   workoutTemplateId String?                  @db.Uuid
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @default(now()) @updatedAt
+  deletedAt         DateTime?
   workoutProgramId  String?                  @db.Uuid
   comment           String?
   name              String                   @default("Séance libre")
