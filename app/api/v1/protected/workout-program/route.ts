@@ -27,14 +27,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
     const workoutPrograms = await prisma.workoutProgram.findMany({
         where: whereClause,
-        include: {
-            workoutTemplateLinks: {
-                orderBy: {
-                    order: 'asc'
-                },
-            },
-            workoutHistory: true
-        },
     })
 
     if (!workoutPrograms) {

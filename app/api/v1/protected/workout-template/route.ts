@@ -37,8 +37,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     const workoutTemplates = await prisma?.workoutTemplate.findMany({
         where: whereClause,
         include: {
+            //TODO à delete une fois la mise à jour du front effectuée (d'ici le 25/05)
             workoutHistory: { include: { exercises: { include: { exercise: true } } } },
-            workoutProgramLinks: { include: { workoutProgram: true } },
             exercises: {
                 include: { exercise: true },
                 orderBy: {
@@ -60,14 +60,9 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         });
     }
 
-    const formattedWorkoutTemplates = workoutTemplates.map(({ workoutProgramLinks, ...rest }) => ({
-        ...rest,
-        workoutPrograms: workoutProgramLinks.map(link => link.workoutProgram)
-    }));
-
     return apiResponse({
         message: 'Successfully retrieved workout templates',
-        data: formattedWorkoutTemplates,
+        data: workoutTemplates,
         success: true,
     });
 });
