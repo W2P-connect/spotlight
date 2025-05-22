@@ -176,11 +176,11 @@ model WorkoutProgramWorkoutTemplate {
   workoutTemplateId String          @db.Uuid
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @default(now()) @updatedAt
+  deletedAt         DateTime?
   order             Int             @default(1)
   workoutProgram    WorkoutProgram  @relation(fields: [workoutProgramId], references: [id], onDelete: Cascade)
   workoutTemplate   WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
 
-  @@unique([workoutProgramId, workoutTemplateId])
   @@map("workout_program_workout_template")
 }
 

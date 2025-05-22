@@ -61,7 +61,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     });
 
     return apiResponse({
-        message: "Successfully created workout program",
+        message: "Successfully created workout program template link",
         data: newWorkoutTemplateLink,
         success: true,
     });

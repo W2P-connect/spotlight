@@ -23,6 +23,10 @@ export const DELETE = withErrorHandler(async (
             data: { deletedAt: new Date() }
         });
 
+        await prisma.workoutProgramWorkoutTemplate.deleteMany({
+            where: { workoutTemplateId: templateId }
+        })
+        
         return apiResponse({
             message: 'Successfully deleted workoutTemplate',
             data: [],

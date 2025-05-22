@@ -31,7 +31,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
             workoutTemplateLinks: {
                 orderBy: {
                     order: 'asc'
-                }
+                },
             },
             workoutHistory: true
         },

@@ -47,20 +47,6 @@ export const PUT = withErrorHandler(async (
         });
     }
 
-    const program = await prisma.workoutProgram.findUnique({
-        where: {
-            id: programId,
-            ownerId: userId,
-        }
-    });
-
-    if (!program) {
-        return apiResponse({
-            message: 'Program not found or does not belong to the user',
-            success: false,
-        });
-    }
-
     // Mise à jour de la relation entre le programme et le template
     const existingRelation = await prisma.workoutProgramWorkoutTemplate.update({
         where: {
@@ -93,12 +79,13 @@ export const DELETE = withErrorHandler(async (
     }
 
     try {
-        await prisma.workoutProgramWorkoutTemplate.delete({
+        await prisma.workoutProgramWorkoutTemplate.updateMany({
             where: {
-                workoutProgramId_workoutTemplateId: {
-                    workoutProgramId: programId,
-                    workoutTemplateId: templateId
-                }
+                workoutProgramId: programId,
+                workoutTemplateId: templateId
+            },
+            data: {
+                deletedAt: new Date()
             }
         });
 
@@ -106,7 +93,7 @@ export const DELETE = withErrorHandler(async (
             message: 'Successfully removed template from program',
             success: true,
         });
-        
+
     } catch (error: any) {
         if (error.code === 'P2025') {
             return apiResponse({
