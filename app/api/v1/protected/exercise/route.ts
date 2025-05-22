@@ -24,10 +24,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         ],
     };
 
-    if (since) {
-        whereClause.updatedAt = { gt: new Date(since) };
-    }
-
     const exercises = await prisma?.exercise.findMany({
         where: whereClause,
         include: {

@@ -67,6 +67,7 @@ model WorkoutProgram {
   owner                Profile                         @relation(fields: [ownerId], references: [id])
   workoutTemplateLinks WorkoutProgramWorkoutTemplate[]
 
+  @@index([updatedAt])
   @@map("workout_program")
 }
 
@@ -83,6 +84,7 @@ model WorkoutTemplate {
   owner               Profile                         @relation(fields: [ownerId], references: [id])
   exercises           WorkoutTemplateExercise[]
 
+  @@index([updatedAt])
   @@map("workout_template")
 }
 
@@ -109,6 +111,7 @@ model WorkoutHistory {
   workoutTemplate   WorkoutTemplate?         @relation(fields: [workoutTemplateId], references: [id])
   exercises         WorkoutHistoryExercise[]
 
+  @@index([updatedAt])
   @@map("workout_history")
 }
 
@@ -121,6 +124,7 @@ model Like {
   user      Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
+  @@index([postId])
   @@map("like")
 }
 
@@ -151,6 +155,7 @@ model Comment {
   user       Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
   likes      CommentLike[]
 
+  @@index([postId])
   @@map("comment")
 }
 
@@ -167,6 +172,8 @@ model Exercise {
   workoutTemplates WorkoutTemplateExercise[]
   muscles          Muscle[]                  @relation("ExerciseToMuscle")
 
+  @@index([updatedAt])
+  @@index([ownerId])
   @@map("exercise")
 }
 
@@ -181,6 +188,7 @@ model WorkoutProgramWorkoutTemplate {
   workoutProgram    WorkoutProgram  @relation(fields: [workoutProgramId], references: [id], onDelete: Cascade)
   workoutTemplate   WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
 
+  @@index([updatedAt])
   @@map("workout_program_workout_template")
 }
 
@@ -258,14 +266,15 @@ model Notification {
   message     String
   data        Json
   isRead      Boolean          @default(false)
-  createdAt   DateTime         @default(now()) @updatedAt
-  updatedAt   DateTime         @default(now())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now()) @updatedAt
   postId      String?          @db.Uuid
   createdBy   String           @db.Uuid
   type        NotificationType
   createruser Profile          @relation("createrUser", fields: [createdBy], references: [id])
   user        Profile          @relation("receverUser", fields: [userId], references: [id])
 
+  @@index([updatedAt])
   @@map("notification")
 }
 
