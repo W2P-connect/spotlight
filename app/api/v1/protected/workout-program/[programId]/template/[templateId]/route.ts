@@ -48,12 +48,11 @@ export const PUT = withErrorHandler(async (
     }
 
     // Mise à jour de la relation entre le programme et le template
-    const existingRelation = await prisma.workoutProgramWorkoutTemplate.update({
+    const existingRelation = await prisma.workoutProgramWorkoutTemplate.updateMany({
         where: {
-            workoutProgramId_workoutTemplateId: {
-                workoutProgramId: programId,
-                workoutTemplateId: templateId
-            }
+            workoutProgramId: programId,
+            workoutTemplateId: templateId,
+            deletedAt: null
         },
         data: parsedBody.data
     });
