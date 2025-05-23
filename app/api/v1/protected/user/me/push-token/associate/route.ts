@@ -1,13 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { apiResponse } from "@/utils/apiResponse";
 import { withErrorHandler } from "@/utils/errorHandler";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
-export const POST = withErrorHandler(async (
+export const PUT = withErrorHandler(async (
     req: NextRequest,
-    { params }: { params: Promise<{ userId: string }> }
 ) => {
-    const { userId } = await params;
+    const userId = req.headers.get("x-user-id") as string //From middleware;
     const body = await req.json();
     const { token } = body;
 

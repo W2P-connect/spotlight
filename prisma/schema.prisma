@@ -252,10 +252,10 @@ model MuscleGroup {
 model PushToken {
   id        String   @id @default(uuid())
   token     String   @unique
-  profileId String   @db.Uuid
+  profileId String?  @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-  profile   Profile  @relation(fields: [profileId], references: [id])
+  profile   Profile? @relation(fields: [profileId], references: [id])
 
   @@map("push_token")
 }

@@ -64,6 +64,14 @@ export const PUT = withErrorHandler(async (
             data: parsedBody.data
         });
 
+        await prisma.workoutTemplate.update({
+            where: {
+                ownerId: userId,
+                id: templateId
+            },
+            data: { updatedAt: new Date() }
+        });
+
         return apiResponse({
             message: 'Successfully updated workoutTemplateExercice',
             data: exercice,

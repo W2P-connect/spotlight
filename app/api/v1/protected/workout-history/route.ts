@@ -78,6 +78,8 @@ export const GET = (async (req: NextRequest) => {
         }
     });
 
+    console.log("workoutHistory lenght", workoutHistory.length);
+
     return apiResponse({
         message: 'Successfully retrieved workout history',
         data: workoutHistory.map(workout => ({

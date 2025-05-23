@@ -84,6 +84,13 @@ export const DELETE = withErrorHandler(async (
             },
         });
 
+        await prisma.workoutHistory.update({
+            where: {
+                id: id,
+                ownerId: userId
+            },
+            data: { updatedAt: new Date() },
+        })
 
         return apiResponse({
             message: 'Successfully deleted workout history exercise',
