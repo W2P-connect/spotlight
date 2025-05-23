@@ -24,8 +24,8 @@ export const PUT = withErrorHandler(async (req: NextRequest) => {
             log: {
                 message: 'First name or last name is invalid.',
                 metadata: {
-                    firstName,
-                    lastName,
+                    firstName: firstName.trim(),
+                    lastName: lastName.trim(),
                 },
             }
         });
@@ -143,7 +143,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         .from('profile')
         .select('id, display_name, profil_picture, first_name, last_name, username')
         .ilike('search_value', `%${query}%`)
-        .limit(10);
+        .limit(5);
 
     if (error) {
         return apiResponse({

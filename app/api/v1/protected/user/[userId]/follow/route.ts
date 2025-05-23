@@ -1,10 +1,8 @@
 import { toggleFollow } from "@/lib/profile";
 import { apiResponse } from "@/utils/apiResponse";
-import { logWarning, withErrorHandler } from "@/utils/errorHandler";
-import { createAdminClient } from "@/utils/supabase/admin";
+import { withErrorHandler } from "@/utils/errorHandler";
 import { removeUndefined } from "@/utils/utils";
-import { error } from "console";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 export const PUT = withErrorHandler(async (
     req: NextRequest,
