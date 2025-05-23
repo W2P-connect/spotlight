@@ -14,12 +14,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const parsedBody = workoutHistoryExerciseSchema.parse(body);
     const userId = req.headers.get("x-user-id") as string;
 
-    const workoutHistory = await prisma.workoutHistory.findUnique({
+    const workoutHistory = await prisma.workoutHistory.update({
         where: {
             id: parsedBody.workoutHistoryId,
             ownerId: userId
         },
-        select: { ownerId: true },
+        data: { updatedAt: new Date() },
     });
 
     if (!workoutHistory) {

@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
 import { updateWorkoutHistoryExerciseSchema } from '@/lib/zod/history';
 import { apiResponse } from '@/utils/apiResponse';
 import { removeUndefined, safeStringify } from '@/utils/utils';
@@ -52,6 +51,14 @@ export const PUT = withErrorHandler(async (
         },
         data: parsedBody.data
     });
+
+    await prisma.workoutHistory.update({
+        where: {
+            id: id,
+            ownerId: userId
+        },
+        data: { updatedAt: new Date() },
+    })
 
     return apiResponse({
         message: 'Successfully updated workout history exercise',

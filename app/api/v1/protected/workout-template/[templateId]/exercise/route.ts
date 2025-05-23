@@ -44,6 +44,14 @@ export const POST = withErrorHandler(async (
         data: body
     });
 
+    await prisma.workoutTemplate.update({
+        where: {
+            ownerId: userId,
+            id: templateId
+        },
+        data: { updatedAt: new Date() }
+    });
+
     return apiResponse({
         message: 'Successfully created workoutTemplateExercise',
         data: exercice,
