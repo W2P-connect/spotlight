@@ -67,6 +67,7 @@ const getProfileData = async (userId: Profile["id"], publicData = false) => {
         followersCount: profileData.followersCount,
         posts: profileData.posts,
         like: profileData.like,
+        displayName: profileData.displayName
     }
 }
 
