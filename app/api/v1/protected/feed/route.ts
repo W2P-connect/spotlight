@@ -7,7 +7,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string;
 
     const searchParams = req.nextUrl.searchParams
-    const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
     const since = searchParams.get('since');
 
@@ -38,7 +37,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     const posts = await prisma.workoutHistory.findMany({
         where: {
             ownerId: { in: followingIds },
-            isPublic: true
+            isPublic: true,
+            updatedAt: since ? { gt: new Date(since) } : undefined
         },
         include: {
             owner: {
@@ -58,7 +58,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         },
         orderBy: { date: 'desc' },
         skip: offset,
-        take: limit
+        take: 10 //La limite ne doit pas venir du front !
     });
 
 
