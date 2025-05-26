@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import getProfileData from '@/lib/profile';
 import { apiResponse } from '@/utils/apiResponse';
 import { withErrorHandler } from '@/utils/errorHandler';
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 
 export const GET = withErrorHandler(async (
     req: NextRequest,
