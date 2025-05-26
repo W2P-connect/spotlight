@@ -160,17 +160,17 @@ model Comment {
 }
 
 model Exercise {
-  id               String                    @id @default(uuid()) @db.Uuid
-  name             String
-  isPublic         Boolean                   @default(false)
-  ownerId          String?                   @db.Uuid
-  createdAt        DateTime                  @default(now())
-  updatedAt        DateTime                  @default(now()) @updatedAt
-  tags             String[]                  @default([])
-  owner            Profile?                  @relation(fields: [ownerId], references: [id])
-  workoutHistories WorkoutHistoryExercise[]
-  workoutTemplates WorkoutTemplateExercise[]
-  muscles          Muscle[]                  @relation("ExerciseToMuscle")
+  id                String                    @id @default(uuid()) @db.Uuid
+  name              String
+  isPublic          Boolean                   @default(false)
+  ownerId           String?                   @db.Uuid
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @default(now()) @updatedAt
+  tags              String[]                  @default([])
+  owner             Profile?                  @relation(fields: [ownerId], references: [id])
+  workoutHistories  WorkoutHistoryExercise[]
+  workoutTemplates  WorkoutTemplateExercise[]
+  exerciseToMuscles ExerciseToMuscle[]
 
   @@index([updatedAt])
   @@index([ownerId])
@@ -231,19 +231,32 @@ model WorkoutTemplateExercise {
 }
 
 model Muscle {
-  id            String      @id @default(uuid()) @db.Uuid
-  name          String
-  muscleGroupId String      @db.Uuid
-  muscleGroup   MuscleGroup @relation(fields: [muscleGroupId], references: [id])
-  exercises     Exercise[]  @relation("ExerciseToMuscle")
+  id                String             @id @default(uuid()) @db.Uuid
+  name              String
+  muscleGroupId     String             @db.Uuid
+  muscleGroup       MuscleGroup        @relation(fields: [muscleGroupId], references: [id])
+  exerciseToMuscles ExerciseToMuscle[]
 
   @@map("muscle")
+}
+
+model ExerciseToMuscle {
+  exerciseId String  @db.Uuid
+  muscleId   String  @db.Uuid
+  intensity  Int
+  isMain     Boolean
+
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+  muscle   Muscle   @relation(fields: [muscleId], references: [id])
+
+  @@id([exerciseId, muscleId])
+  @@map("exercise_to_muscle")
 }
 
 model MuscleGroup {
   id      String   @id @default(uuid()) @db.Uuid
   name    String
-  order   Int?     @unique
+  order   Int?     @unique //ordre d'affichage
   muscles Muscle[]
 
   @@map("muscle_group")
