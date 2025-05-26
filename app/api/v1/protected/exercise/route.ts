@@ -27,9 +27,13 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     const exercises = await prisma?.exercise.findMany({
         where: whereClause,
         include: {
-            muscles: {
+            exerciseToMuscles: {
                 include: {
-                    muscleGroup: true
+                    muscle: {
+                        include: {
+                            muscleGroup: true
+                        }
+                    }
                 }
             },
         },
