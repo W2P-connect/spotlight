@@ -60,9 +60,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
     console.log("workoutTemplates.length", workoutTemplates.length);
 
-    console.log("workoutTemplates", workoutTemplates[0]);
-
-
     return apiResponse({
         message: 'Successfully retrieved workout templates',
         data: workoutTemplates,
