@@ -18,13 +18,12 @@ async function main() {
             return new;
         end;
         $$ language plpgsql security definer;
-    `;
-
+        `;
     await sql`
         create or replace trigger on_auth_user_created
             after insert on auth.users
             for each row execute procedure public.handle_new_user();
-    `;
+      `;
 
     await sql`
         create or replace function public.handle_user_delete()
@@ -34,7 +33,7 @@ async function main() {
           return old;
         end;
         $$ language plpgsql security definer;
-    `;
+      `;
 
     await sql`
         create or replace trigger on_profile_user_deleted
@@ -42,15 +41,8 @@ async function main() {
           for each row execute procedure public.handle_user_delete()
       `;
 
-    await sql`
-        create unique index if not exists unique_main_muscle_per_exercise
-        on exercise_to_muscle (exercise_id)
-        where is_main = true;
-    `;
-
-
     console.log(
-        "Finished adding triggers and functions for profile handling and other stuff."
+        "Finished adding triggers and functions for profile handling."
     );
     process.exit();
 }
