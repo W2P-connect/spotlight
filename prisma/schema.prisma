@@ -75,6 +75,7 @@ model WorkoutTemplate {
   id                  String                           @id @default(uuid()) @db.Uuid
   name                String
   ownerId             String                           @db.Uuid
+  type                TemplateType                     @default(body)
   createdAt           DateTime                         @default(now())
   updatedAt           DateTime                         @default(now()) @updatedAt
   deletedAt           DateTime?
@@ -104,6 +105,7 @@ model WorkoutHistory {
   duration          Int?
   likesCount        Int                       @default(0)
   commentsCount     Int                       @default(0)
+  type              TemplateType              @default(body)
   Comment           Comment[]
   Like              Like[]
   owner             Profile                  @relation(fields: [ownerId], references: [id])
@@ -203,8 +205,9 @@ model WorkoutHistoryExercise {
   order            Int             @default(1)
   supersetId       String?         @db.Uuid
   restTime         Int[]
-  maxReps          Int[]
   minReps          Int[]
+  maxReps          Int[]
+  intensity        Int[]
   comment          String?
   exercise         Exercise       @relation(fields: [exerciseId], references: [id])
   workoutHistory   WorkoutHistory @relation(fields: [workoutHistoryId], references: [id], onDelete: Cascade)
@@ -218,6 +221,7 @@ model WorkoutTemplateExercise {
   exerciseId        String           @db.Uuid
   minReps           Int[]
   maxReps           Int[]
+  intensity         Int[]
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @default(now()) @updatedAt
   order             Int              @default(1)
@@ -355,4 +359,9 @@ enum NotificationType {
   comment
   generic
   follow
+}
+
+enum TemplateType {
+  body
+  power
 }

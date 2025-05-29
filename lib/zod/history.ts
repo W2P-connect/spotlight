@@ -1,14 +1,15 @@
-import { cleanComment } from '@/utils/utils';
-import { z } from 'zod';
+import { cleanComment } from "@/utils/utils";
+import { z } from "zod";
 
 const zCleanedComment = z
-    .string()
-    .max(200, { message: "Le commentaire ne peut pas dépasser 200 caractères." })
-    .nullable()
-    .optional()
-    .transform((val) => (typeof val === "string" ? cleanComment(val) : val));
+  .string()
+  .max(200, { message: "Le commentaire ne peut pas dépasser 200 caractères." })
+  .nullable()
+  .optional()
+  .transform((val) => (typeof val === "string" ? cleanComment(val) : val));
 
-export const workoutHistoryExerciseSchema = z.object({
+export const workoutHistoryExerciseSchema = z
+  .object({
     id: z.string().uuid(),
     workoutHistoryId: z.string().uuid(),
     exerciseId: z.string().uuid(),
@@ -17,14 +18,17 @@ export const workoutHistoryExerciseSchema = z.object({
     weight: z.array(z.number().nonnegative()),
     minReps: z.array(z.number().int().nonnegative()),
     maxReps: z.array(z.number().int().nonnegative()),
+    intensity: z.array(z.number().int().nonnegative()),
     restTime: z.array(z.number().int().nonnegative()),
     order: z.number().int().nonnegative().default(1),
     supersetId: z.string().uuid().nullable().optional(),
     createdAt: z.string().datetime(),
     updatedAt: z.string().datetime(),
-}).strip();
+  })
+  .strip();
 
-export const updateWorkoutHistoryExerciseSchema = z.object({
+export const updateWorkoutHistoryExerciseSchema = z
+  .object({
     order: z.number().nonnegative().optional(),
     nbReps: z.array(z.number().positive()).optional(),
     weight: z.array(z.number()).optional(),
@@ -32,9 +36,11 @@ export const updateWorkoutHistoryExerciseSchema = z.object({
     restTime: z.array(z.number().int().nonnegative()).optional(),
     supersetId: z.string().uuid().nullable().optional(),
     exerciseId: z.string().uuid().optional(),
-}).strip();
+  })
+  .strip();
 
-export const workoutHistorySchema = z.object({
+export const workoutHistorySchema = z
+  .object({
     id: z.string().uuid(),
     date: z.string().datetime().optional(),
     ownerId: z.string().uuid(),
@@ -45,13 +51,16 @@ export const workoutHistorySchema = z.object({
     comment: zCleanedComment,
     isPublic: z.boolean().optional(),
     workoutPlace: z.string().nullable().optional(),
-}).strip();
+  })
+  .strip();
 
-export const updateWorkoutHistorySchema = z.object({
+export const updateWorkoutHistorySchema = z
+  .object({
     name: z.string().min(1).optional(),
     comment: zCleanedComment,
     workoutTemplateId: z.string().uuid().nullable().optional(),
     workoutProgramId: z.string().uuid().nullable().optional(),
     isPublic: z.boolean().optional(),
     workoutPlace: z.string().nullable().optional(),
-}).strip();
+  })
+  .strip();
