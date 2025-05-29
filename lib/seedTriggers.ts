@@ -18,13 +18,18 @@ async function main() {
             return new;
         end;
         $$ language plpgsql security definer;
+<<<<<<< HEAD
     `;
 
   await sql`
+=======
+        `;
+  await sql`
+>>>>>>> bb2aece52b7c212d7b8477188b531354a0a9aae9
         create or replace trigger on_auth_user_created
             after insert on auth.users
             for each row execute procedure public.handle_new_user();
-    `;
+      `;
 
   await sql`
         create or replace function public.handle_user_delete()
@@ -34,7 +39,7 @@ async function main() {
           return old;
         end;
         $$ language plpgsql security definer;
-    `;
+      `;
 
   await sql`
         create or replace trigger on_profile_user_deleted
@@ -42,9 +47,7 @@ async function main() {
           for each row execute procedure public.handle_user_delete()
       `;
 
-  console.log(
-    "Finished adding triggers and functions for profile handling and other stuff."
-  );
+  console.log("Finished adding triggers and functions for profile handling.");
   process.exit();
 }
 

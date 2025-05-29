@@ -54,15 +54,14 @@ model Follow {
 model WorkoutProgram {
   id                   String                           @id @default(uuid()) @db.Uuid
   name                 String
-  color                String?
   startDate            DateTime?
   endDate              DateTime?
   ownerId              String                           @db.Uuid
   createdAt            DateTime                         @default(now())
   updatedAt            DateTime                         @default(now()) @updatedAt
-  deletedAt            DateTime?
   index                Int                              @unique @default(autoincrement())
-
+  color                String?
+  deletedAt            DateTime?
   workoutHistory       WorkoutHistory[]
   owner                Profile                         @relation(fields: [ownerId], references: [id])
   workoutTemplateLinks WorkoutProgramWorkoutTemplate[]
@@ -75,11 +74,10 @@ model WorkoutTemplate {
   id                  String                           @id @default(uuid()) @db.Uuid
   name                String
   ownerId             String                           @db.Uuid
-  type                TemplateType                     @default(body)
   createdAt           DateTime                         @default(now())
   updatedAt           DateTime                         @default(now()) @updatedAt
   deletedAt           DateTime?
-
+  type                TemplateType                     @default(body)
   workoutHistory      WorkoutHistory[]
   workoutProgramLinks WorkoutProgramWorkoutTemplate[]
   owner               Profile                         @relation(fields: [ownerId], references: [id])
@@ -96,7 +94,6 @@ model WorkoutHistory {
   workoutTemplateId String?                   @db.Uuid
   createdAt         DateTime                  @default(now())
   updatedAt         DateTime                  @default(now()) @updatedAt
-  deletedAt         DateTime?
   workoutProgramId  String?                   @db.Uuid
   comment           String?
   name              String                    @default("Séance libre")
@@ -105,6 +102,7 @@ model WorkoutHistory {
   duration          Int?
   likesCount        Int                       @default(0)
   commentsCount     Int                       @default(0)
+  deletedAt         DateTime?
   type              TemplateType              @default(body)
   Comment           Comment[]
   Like              Like[]
@@ -170,9 +168,9 @@ model Exercise {
   updatedAt         DateTime                   @default(now()) @updatedAt
   tags              String[]                   @default([])
   owner             Profile?                  @relation(fields: [ownerId], references: [id])
+  exerciseToMuscles ExerciseToMuscle[]
   workoutHistories  WorkoutHistoryExercise[]
   workoutTemplates  WorkoutTemplateExercise[]
-  exerciseToMuscles ExerciseToMuscle[]
 
   @@index([updatedAt])
   @@index([ownerId])
@@ -185,8 +183,8 @@ model WorkoutProgramWorkoutTemplate {
   workoutTemplateId String           @db.Uuid
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @default(now()) @updatedAt
-  deletedAt         DateTime?
   order             Int              @default(1)
+  deletedAt         DateTime?
   workoutProgram    WorkoutProgram  @relation(fields: [workoutProgramId], references: [id], onDelete: Cascade)
   workoutTemplate   WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
 
@@ -209,6 +207,7 @@ model WorkoutHistoryExercise {
   maxReps          Int[]
   intensity        Int[]
   comment          String?
+  intensity        Int[]
   exercise         Exercise       @relation(fields: [exerciseId], references: [id])
   workoutHistory   WorkoutHistory @relation(fields: [workoutHistoryId], references: [id], onDelete: Cascade)
 
@@ -221,13 +220,13 @@ model WorkoutTemplateExercise {
   exerciseId        String           @db.Uuid
   minReps           Int[]
   maxReps           Int[]
-  intensity         Int[]
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @default(now()) @updatedAt
   order             Int              @default(1)
   supersetId        String?          @db.Uuid
   restTime          Int[]
   comment           String           @default("")
+  intensity         Int[]
   exercise          Exercise        @relation(fields: [exerciseId], references: [id])
   workoutTemplate   WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
 
@@ -238,8 +237,8 @@ model Muscle {
   id                String              @id @default(uuid()) @db.Uuid
   name              String
   muscleGroupId     String              @db.Uuid
-  muscleGroup       MuscleGroup        @relation(fields: [muscleGroupId], references: [id])
   exerciseToMuscles ExerciseToMuscle[]
+  muscleGroup       MuscleGroup        @relation(fields: [muscleGroupId], references: [id])
 
   @@map("muscle")
 }
@@ -249,7 +248,6 @@ model ExerciseToMuscle {
   muscleId   String    @db.Uuid
   intensity  Int
   isMain     Boolean
-
   exercise   Exercise @relation(fields: [exerciseId], references: [id])
   muscle     Muscle   @relation(fields: [muscleId], references: [id])
 
@@ -260,7 +258,7 @@ model ExerciseToMuscle {
 model MuscleGroup {
   id      String    @id @default(uuid()) @db.Uuid
   name    String
-  order   Int?      @unique //ordre d'affichage
+  order   Int?      @unique
   muscles Muscle[]
 
   @@map("muscle_group")
@@ -284,10 +282,10 @@ model Notification {
   data        Json
   isRead      Boolean           @default(false)
   createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @default(now()) @updatedAt
   postId      String?           @db.Uuid
   createdBy   String            @db.Uuid
   type        NotificationType
+  updatedAt   DateTime          @default(now()) @updatedAt
   createruser Profile          @relation("createrUser", fields: [createdBy], references: [id])
   user        Profile          @relation("receverUser", fields: [userId], references: [id])
 
