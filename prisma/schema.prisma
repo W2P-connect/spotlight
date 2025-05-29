@@ -207,7 +207,6 @@ model WorkoutHistoryExercise {
   maxReps          Int[]
   intensity        Int[]
   comment          String?
-  intensity        Int[]
   exercise         Exercise       @relation(fields: [exerciseId], references: [id])
   workoutHistory   WorkoutHistory @relation(fields: [workoutHistoryId], references: [id], onDelete: Cascade)
 
