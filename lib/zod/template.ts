@@ -11,8 +11,8 @@ export const workoutTemplateLinkSchema = z.object({
 
 export const updateWorkoutTemplateExerciseSchema = z.object({
   minReps: z.array(z.number().int().positive()),
-  maxReps: z.array(z.number().int().nonnegative()),
-  intensity: z.array(z.number().int().nonnegative()),
+  maxReps: z.array(z.number().int().nonnegative()).optional(),
+  intensity: z.array(z.number().int().nonnegative()).optional(),
   restTime: z.array(z.number().int().nonnegative()).optional(),
   order: z.number().int().nonnegative().default(1),
   supersetId: z.string().uuid().nullable().optional(),
