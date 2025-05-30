@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { apiResponse } from '@/utils/apiResponse';
 import { withErrorHandler } from '@/utils/errorHandler';
 import { NextRequest } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export const GET = withErrorHandler(async (
     req: NextRequest,
