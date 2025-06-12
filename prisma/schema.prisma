@@ -8,17 +8,17 @@ datasource db {
 }
 
 model Profile {
-  id                    String                                       @id @default(uuid()) @db.Uuid
-  role                  Role                                         @default(user)
-  createdAt             DateTime                                     @default(now())
-  updatedAt             DateTime                                     @default(now()) @updatedAt
+  id                    String                @id @default(uuid()) @db.Uuid
+  role                  Role                  @default(user)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @default(now()) @updatedAt
   searchValue           String?               @map("search_value")
   displayName           String?               @map("display_name")
   firstName             String?               @map("first_name")
   lastName              String?               @map("last_name")
   username              String?
-  followersCount        Int                                          @default(0)
-  followingCount        Int                                          @default(0)
+  followersCount        Int                   @default(0)
+  followingCount        Int                   @default(0)
   profilePicture        String?               @map("profil_picture")
   Comment               Comment[]
   CommentLike           CommentLike[]
@@ -40,10 +40,10 @@ model Profile {
 }
 
 model Follow {
-  id          String    @id @default(uuid()) @db.Uuid
-  followerId  String    @db.Uuid
-  followingId String    @db.Uuid
-  createdAt   DateTime  @default(now())
+  id          String   @id @default(uuid()) @db.Uuid
+  followerId  String   @db.Uuid
+  followingId String   @db.Uuid
+  createdAt   DateTime @default(now())
   follower    Profile  @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
   following   Profile  @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
 
@@ -52,14 +52,14 @@ model Follow {
 }
 
 model WorkoutProgram {
-  id                   String                           @id @default(uuid()) @db.Uuid
+  id                   String                          @id @default(uuid()) @db.Uuid
   name                 String
   startDate            DateTime?
   endDate              DateTime?
-  ownerId              String                           @db.Uuid
-  createdAt            DateTime                         @default(now())
-  updatedAt            DateTime                         @default(now()) @updatedAt
-  index                Int                              @unique @default(autoincrement())
+  ownerId              String                          @db.Uuid
+  createdAt            DateTime                        @default(now())
+  updatedAt            DateTime                        @default(now()) @updatedAt
+  index                Int                             @unique @default(autoincrement())
   color                String?
   deletedAt            DateTime?
   workoutHistory       WorkoutHistory[]
@@ -71,13 +71,13 @@ model WorkoutProgram {
 }
 
 model WorkoutTemplate {
-  id                  String                           @id @default(uuid()) @db.Uuid
-  name                String
-  ownerId             String                           @db.Uuid
-  createdAt           DateTime                         @default(now())
-  updatedAt           DateTime                         @default(now()) @updatedAt
+  id                  String                          @id @default(uuid()) @db.Uuid
+  name                String                          @db.VarChar(30)
+  ownerId             String                          @db.Uuid
+  createdAt           DateTime                        @default(now())
+  updatedAt           DateTime                        @default(now()) @updatedAt
   deletedAt           DateTime?
-  type                TemplateType                     @default(body)
+  type                TemplateType                    @default(body)
   workoutHistory      WorkoutHistory[]
   workoutProgramLinks WorkoutProgramWorkoutTemplate[]
   owner               Profile                         @relation(fields: [ownerId], references: [id])
@@ -88,22 +88,22 @@ model WorkoutTemplate {
 }
 
 model WorkoutHistory {
-  id                String                    @id @default(uuid()) @db.Uuid
-  date              DateTime                  @default(now())
-  ownerId           String                    @db.Uuid
-  workoutTemplateId String?                   @db.Uuid
-  createdAt         DateTime                  @default(now())
-  updatedAt         DateTime                  @default(now()) @updatedAt
-  workoutProgramId  String?                   @db.Uuid
+  id                String                   @id @default(uuid()) @db.Uuid
+  date              DateTime                 @default(now())
+  ownerId           String                   @db.Uuid
+  workoutTemplateId String?                  @db.Uuid
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @default(now()) @updatedAt
+  workoutProgramId  String?                  @db.Uuid
   comment           String?
-  name              String                    @default("Séance libre")
-  isPublic          Boolean                   @default(false)
+  name              String                   @default("Séance libre")
+  isPublic          Boolean                  @default(false)
   workoutPlace      String?
   duration          Int?
-  likesCount        Int                       @default(0)
-  commentsCount     Int                       @default(0)
+  likesCount        Int                      @default(0)
+  commentsCount     Int                      @default(0)
   deletedAt         DateTime?
-  type              TemplateType              @default(body)
+  type              TemplateType             @default(body)
   Comment           Comment[]
   Like              Like[]
   owner             Profile                  @relation(fields: [ownerId], references: [id])
@@ -116,10 +116,10 @@ model WorkoutHistory {
 }
 
 model Like {
-  id        String          @id @default(uuid()) @db.Uuid
-  userId    String          @db.Uuid
-  postId    String          @db.Uuid
-  createdAt DateTime        @default(now())
+  id        String         @id @default(uuid()) @db.Uuid
+  userId    String         @db.Uuid
+  postId    String         @db.Uuid
+  createdAt DateTime       @default(now())
   post      WorkoutHistory @relation(fields: [postId], references: [id], onDelete: Cascade)
   user      Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -129,10 +129,10 @@ model Like {
 }
 
 model CommentLike {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @db.Uuid
-  commentId String    @db.Uuid
-  createdAt DateTime  @default(now())
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  commentId String   @db.Uuid
+  createdAt DateTime @default(now())
   comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
   user      Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -141,14 +141,14 @@ model CommentLike {
 }
 
 model Comment {
-  id         String          @id @default(uuid()) @db.Uuid
-  postId     String          @db.Uuid
-  userId     String          @db.Uuid
-  parentId   String?         @db.Uuid
-  content    String          @db.VarChar(2200)
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @default(now()) @updatedAt
-  likesCount Int             @default(0)
+  id         String         @id @default(uuid()) @db.Uuid
+  postId     String         @db.Uuid
+  userId     String         @db.Uuid
+  parentId   String?        @db.Uuid
+  content    String         @db.VarChar(2200)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @default(now()) @updatedAt
+  likesCount Int            @default(0)
   parent     Comment?       @relation("CommentReplies", fields: [parentId], references: [id])
   replies    Comment[]      @relation("CommentReplies")
   post       WorkoutHistory @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -160,13 +160,13 @@ model Comment {
 }
 
 model Exercise {
-  id                String                     @id @default(uuid()) @db.Uuid
+  id                String                    @id @default(uuid()) @db.Uuid
   name              String
-  isPublic          Boolean                    @default(false)
-  ownerId           String?                    @db.Uuid
-  createdAt         DateTime                   @default(now())
-  updatedAt         DateTime                   @default(now()) @updatedAt
-  tags              String[]                   @default([])
+  isPublic          Boolean                   @default(false)
+  ownerId           String?                   @db.Uuid
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @default(now()) @updatedAt
+  tags              String[]                  @default([])
   owner             Profile?                  @relation(fields: [ownerId], references: [id])
   exerciseToMuscles ExerciseToMuscle[]
   workoutHistories  WorkoutHistoryExercise[]
@@ -178,12 +178,12 @@ model Exercise {
 }
 
 model WorkoutProgramWorkoutTemplate {
-  id                String           @id @default(uuid()) @db.Uuid
-  workoutProgramId  String           @db.Uuid
-  workoutTemplateId String           @db.Uuid
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @default(now()) @updatedAt
-  order             Int              @default(1)
+  id                String          @id @default(uuid()) @db.Uuid
+  workoutProgramId  String          @db.Uuid
+  workoutTemplateId String          @db.Uuid
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
+  order             Int             @default(1)
   deletedAt         DateTime?
   workoutProgram    WorkoutProgram  @relation(fields: [workoutProgramId], references: [id], onDelete: Cascade)
   workoutTemplate   WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
@@ -193,20 +193,20 @@ model WorkoutProgramWorkoutTemplate {
 }
 
 model WorkoutHistoryExercise {
-  id               String          @id @default(uuid()) @db.Uuid
-  workoutHistoryId String          @db.Uuid
-  exerciseId       String          @db.Uuid
+  id               String         @id @default(uuid()) @db.Uuid
+  workoutHistoryId String         @db.Uuid
+  exerciseId       String         @db.Uuid
   nbReps           Float[]
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @default(now()) @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now()) @updatedAt
   weight           Float[]
-  order            Int             @default(1)
-  supersetId       String?         @db.Uuid
+  order            Int            @default(1)
+  supersetId       String?        @db.Uuid
   restTime         Int[]
-  minReps          Int[]
   maxReps          Int[]
-  intensity        Int[]
+  minReps          Int[]
   comment          String?
+  intensity        Int[]
   exercise         Exercise       @relation(fields: [exerciseId], references: [id])
   workoutHistory   WorkoutHistory @relation(fields: [workoutHistoryId], references: [id], onDelete: Cascade)
 
@@ -214,17 +214,17 @@ model WorkoutHistoryExercise {
 }
 
 model WorkoutTemplateExercise {
-  id                String           @id @default(uuid()) @db.Uuid
-  workoutTemplateId String           @db.Uuid
-  exerciseId        String           @db.Uuid
+  id                String          @id @default(uuid()) @db.Uuid
+  workoutTemplateId String          @db.Uuid
+  exerciseId        String          @db.Uuid
   minReps           Int[]
   maxReps           Int[]
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @default(now()) @updatedAt
-  order             Int              @default(1)
-  supersetId        String?          @db.Uuid
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
+  order             Int             @default(1)
+  supersetId        String?         @db.Uuid
   restTime          Int[]
-  comment           String           @default("")
+  comment           String          @default("")
   intensity         Int[]
   exercise          Exercise        @relation(fields: [exerciseId], references: [id])
   workoutTemplate   WorkoutTemplate @relation(fields: [workoutTemplateId], references: [id], onDelete: Cascade)
@@ -233,9 +233,9 @@ model WorkoutTemplateExercise {
 }
 
 model Muscle {
-  id                String              @id @default(uuid()) @db.Uuid
+  id                String             @id @default(uuid()) @db.Uuid
   name              String
-  muscleGroupId     String              @db.Uuid
+  muscleGroupId     String             @db.Uuid
   exerciseToMuscles ExerciseToMuscle[]
   muscleGroup       MuscleGroup        @relation(fields: [muscleGroupId], references: [id])
 
@@ -243,8 +243,8 @@ model Muscle {
 }
 
 model ExerciseToMuscle {
-  exerciseId String    @db.Uuid
-  muscleId   String    @db.Uuid
+  exerciseId String   @db.Uuid
+  muscleId   String   @db.Uuid
   intensity  Int
   isMain     Boolean
   exercise   Exercise @relation(fields: [exerciseId], references: [id])
@@ -255,36 +255,36 @@ model ExerciseToMuscle {
 }
 
 model MuscleGroup {
-  id      String    @id @default(uuid()) @db.Uuid
+  id      String   @id @default(uuid()) @db.Uuid
   name    String
-  order   Int?      @unique
+  order   Int?     @unique
   muscles Muscle[]
 
   @@map("muscle_group")
 }
 
 model PushToken {
-  id        String    @id @default(uuid())
-  token     String    @unique
-  profileId String?   @db.Uuid
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
+  id        String   @id @default(uuid())
+  token     String   @unique
+  profileId String?  @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
   profile   Profile? @relation(fields: [profileId], references: [id])
 
   @@map("push_token")
 }
 
 model Notification {
-  id          String            @id @default(uuid())
-  userId      String            @db.Uuid
+  id          String           @id @default(uuid())
+  userId      String           @db.Uuid
   message     String
   data        Json
-  isRead      Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  postId      String?           @db.Uuid
-  createdBy   String            @db.Uuid
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  postId      String?          @db.Uuid
+  createdBy   String           @db.Uuid
   type        NotificationType
-  updatedAt   DateTime          @default(now()) @updatedAt
+  updatedAt   DateTime         @default(now()) @updatedAt
   createruser Profile          @relation("createrUser", fields: [createdBy], references: [id])
   user        Profile          @relation("receverUser", fields: [userId], references: [id])
 
@@ -293,17 +293,17 @@ model Notification {
 }
 
 model ErrorLog {
-  id          Int                            @id @default(autoincrement())
-  createdAt   DateTime                       @default(now())
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
   level       ErrorLevel
   message     String
   stackTrace  String     @map("stack_trace")
   endpoint    String?
   requestId   String?    @map("request_id")
   metadata    Json?
-  environment String                         @default("production")
+  environment String     @default("production")
   resolvedAt  DateTime?
-  userId      String?    @map("user_id")     @db.Uuid
+  userId      String?    @map("user_id") @db.Uuid
   user        Profile?   @relation(fields: [userId], references: [id])
 
   @@index([createdAt])
@@ -313,9 +313,9 @@ model ErrorLog {
 }
 
 model FailedClientRequest {
-  id         String     @id @default(uuid()) @db.Uuid
-  createdAt  DateTime   @default(now())
-  userId     String     @db.Uuid
+  id         String    @id @default(uuid()) @db.Uuid
+  createdAt  DateTime  @default(now())
+  userId     String    @db.Uuid
   endpoint   String
   method     String
   data       Json?
@@ -323,7 +323,7 @@ model FailedClientRequest {
   lastTry    DateTime?
   appVersion String?
   deviceId   String?
-  resolved   Boolean    @default(false)
+  resolved   Boolean   @default(false)
   resolvedAt DateTime?
   notes      String?
   user       Profile   @relation(fields: [userId], references: [id])
@@ -332,11 +332,11 @@ model FailedClientRequest {
 }
 
 model Constantes {
-  id        String    @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
   key       String
   value     Json
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@map("constantes")
 }

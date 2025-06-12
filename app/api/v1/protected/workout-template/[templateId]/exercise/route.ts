@@ -1,8 +1,7 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { z } from "zod";
 import { withErrorHandler } from '@/utils/errorHandler';
 import { apiResponse } from '@/utils/apiResponse';
 

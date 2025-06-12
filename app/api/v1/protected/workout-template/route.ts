@@ -4,6 +4,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withErrorHandler } from '@/utils/errorHandler';
 import { apiResponse } from '@/utils/apiResponse';
+import { workoutTemplateSchema } from '@/lib/zod/template';
+import { removeUndefined, safeStringify } from '@/utils/utils';
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string //From middleware;
@@ -68,12 +70,34 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 });
 
 export const POST = async (req: NextRequest) => {
-    const workoutTemplate = await req.json();
+    const body = await req.json();
     const userId = req.headers.get("x-user-id") as string //From middleware;
+
+    const parsedBody = workoutTemplateSchema.safeParse(body);
+
+    if (!parsedBody.success) {
+
+        console.log("parsedBody.error", parsedBody.error);
+
+        return apiResponse({
+            message: 'Invalid request body',
+            success: false,
+            req: req,
+            log: {
+                message: 'Invalid request body',
+                metadata: {
+                    body,
+                    error: parsedBody.error.message,
+                    parsedBodyData: removeUndefined(parsedBody.data),
+                    parsedBodyError: safeStringify(parsedBody.error),
+                },
+            }
+        });
+    }
 
     const newWorkoutTemplate = await prisma.workoutTemplate.create({
         data: {
-            ...workoutTemplate,
+            ...parsedBody.data,
             ownerId: userId
         }
     })
@@ -86,7 +110,7 @@ export const POST = async (req: NextRequest) => {
             log: {
                 message: 'Failed to create workout template',
                 metadata: {
-                    body: workoutTemplate
+                    body: parsedBody.data
                 },
             }
         });
