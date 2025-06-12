@@ -103,8 +103,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const validatedWorkout = workoutHistorySchema.parse({ ...body, ownerId: userId });
     const validatedExercises = z.array(workoutHistoryExerciseSchema).parse(body.exercises || []);
 
-    // console.log(" => validatedWorkout", validatedWorkout);
-    // console.log(" => validatedExercises", validatedExercises);
+    console.log(" => validatedWorkout", validatedWorkout);
+    console.log(" => validatedExercises", validatedExercises);
 
     // 2. Transaction avec Supabase
     const { data: workout, error: workoutError } = await supabase

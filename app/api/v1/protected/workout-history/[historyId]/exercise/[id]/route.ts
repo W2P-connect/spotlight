@@ -1,21 +1,19 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { updateWorkoutHistoryExerciseSchema } from '@/lib/zod/history';
 import { apiResponse } from '@/utils/apiResponse';
 import { removeUndefined, safeStringify } from '@/utils/utils';
 import { withErrorHandler } from '@/utils/errorHandler';
 
-
-
 export const PUT = withErrorHandler(async (
     req: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    { params }: { params: Promise<{ id: string, historyId: string }> }
 ) => {
     const userId = req.headers.get("x-user-id") as string //From middleware;
 
-    const { id } = await params;
+    const { id, historyId } = await params;
     if (!id) {
         return apiResponse({
             message: 'Missing required parameter: id',
@@ -42,10 +40,14 @@ export const PUT = withErrorHandler(async (
             }
         });
     }
+
+    console.log(" => parsedBody.data", parsedBody.data);
+
     const workoutHistoryExercise = await prisma.workoutHistoryExercise.update({
         where: {
             id: id,
             workoutHistory: {
+                id: historyId,
                 ownerId: userId
             }
         },
@@ -54,7 +56,7 @@ export const PUT = withErrorHandler(async (
 
     await prisma.workoutHistory.update({
         where: {
-            id: id,
+            id: historyId,
             ownerId: userId
         },
         data: { updatedAt: new Date() },
