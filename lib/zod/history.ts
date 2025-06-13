@@ -30,7 +30,7 @@ export const workoutHistoryExerciseSchema = z
 export const updateWorkoutHistoryExerciseSchema = z
   .object({
     order: z.number().nonnegative().optional(),
-    nbReps: z.array(z.number().positive()).optional(),
+    nbReps: z.array(z.number().nonnegative()).optional(),
     weight: z.array(z.number()).optional(),
     comment: zCleanedComment,
     restTime: z.array(z.number().int().nonnegative()).optional(),
