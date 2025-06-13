@@ -32,7 +32,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             }
         });
     }
-
+    
     const [program, template] = await prisma.$transaction([
         prisma.workoutProgram.findFirst({
             where: {
@@ -49,7 +49,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     ])
 
     if (!program || !template) {
-        console.error("Program or template not found");
         return apiResponse({
             message: "Not authorized",
             success: false,

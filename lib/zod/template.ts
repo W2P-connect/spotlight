@@ -20,7 +20,7 @@ export const workoutTemplateLinkSchema = z.object({
 }).strip()
 
 export const updateWorkoutTemplateExerciseSchema = z.object({
-  minReps: z.array(z.number().int().positive()),
+  minReps: z.array(z.number().int().nonnegative()),
   maxReps: z.array(z.number().int().nonnegative()).optional(),
   intensity: z.array(z.number().int().nonnegative()).optional(),
   restTime: z.array(z.number().int().nonnegative()).optional(),
