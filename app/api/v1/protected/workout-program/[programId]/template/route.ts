@@ -1,9 +1,7 @@
 export const dynamic = 'force-dynamic';
 
-import { z } from "zod";
 import { prisma } from '@/lib/prisma';
-import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { NextRequest } from "next/server";
 import { withErrorHandler } from "@/utils/errorHandler";
 import { workoutTemplateLinkSchema } from "@/lib/zod/template";
 import { apiResponse } from "@/utils/apiResponse";

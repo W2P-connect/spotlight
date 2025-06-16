@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { apiResponse } from "@/utils/apiResponse";
 import { toggleCommentLike } from "@/lib/post/utils";
-import { logWarning, withErrorHandler } from "@/utils/errorHandler";
+import { withErrorHandler } from "@/utils/errorHandler";
 
 export const PUT = withErrorHandler(async (
     req: NextRequest,

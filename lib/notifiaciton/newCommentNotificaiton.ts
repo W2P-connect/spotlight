@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma';
 import { sendPushNotification } from './notification';
-import { env } from 'process';
 
 export const newCommentNotification = async (postId: string, commenterId: string) => {
 
@@ -53,7 +52,7 @@ export const newCommentReplyNotification = async (postId: string, commenterId: s
 
     const post = await prisma.workoutHistory.findUnique({
         where: { id: postId },
-        select: { ownerId: true }
+        select: { ownerId: true, name: true }
     });
 
     if (!post) {
@@ -92,7 +91,10 @@ export const newCommentReplyNotification = async (postId: string, commenterId: s
         `${commenterProfile.username} a répondu à votre commentaire`,
         {
             userName: commenterProfile.username,
-            profilePicture: commenterProfile.profilePicture
+            profilePicture: commenterProfile.profilePicture,
+            parentId: parentId,
+            postName: post.name,
+            parentMessage: parentMessage.content
         },
         "Nouveau commentaire",
         "comment",

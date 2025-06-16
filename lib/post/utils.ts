@@ -111,11 +111,8 @@ export async function createComment(userId: string, postId: string, content: str
         });
 
         if (parentId) {
-            console.log("newCommentReplyNotification");
             newCommentReplyNotification(postId, userId, parentId)
-        } else {
-            console.log("newCommentNotification");
-            
+        } else { 
             newCommentNotification(postId, userId);
         }
 
