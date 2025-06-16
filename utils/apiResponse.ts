@@ -51,7 +51,7 @@ export async function apiResponse({
             level: status === 500 ? "error" : "warning",
             message,
             userId: log.userId ?? (req.headers.get("x-user-id") as string | undefined),
-            endpoint: log.endpoint ?? req.nextUrl.pathname,
+            endpoint: log.endpoint ?? `[${req.method}] ${req.nextUrl.pathname}`,
             metadata: {
                 ...safeMetadata,
                 error: safeStringify(log.internalError),
