@@ -82,21 +82,21 @@ export const PUT = withErrorHandler(async (req: NextRequest) => {
         });
     }
 
-    if (profile.username !== username && profile.username && username) {
-        return apiResponse({
-            message: 'Username cannot be changed',
-            success: false,
-            status: 400,
-            req: req,
-            log: {
-                message: 'Username cannot be changed',
-                metadata: {
-                    profileUsername: profile.username,
-                    newUsername: username,
-                },
-            }
-        });
-    }
+    // if (profile.username !== username && profile.username && username) {
+    //     return apiResponse({
+    //         message: 'Username cannot be changed',
+    //         success: false,
+    //         status: 400,
+    //         req: req,
+    //         log: {
+    //             message: 'Username cannot be changed',
+    //             metadata: {
+    //                 profileUsername: profile.username,
+    //                 newUsername: username,
+    //             },
+    //         }
+    //     });
+    // }
 
     const updatedProfile = await updateProfileData(userId, firstName ?? profile.firstName, lastName ?? profile.lastName, username ?? profile.username);
 
