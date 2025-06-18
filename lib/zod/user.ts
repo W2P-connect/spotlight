@@ -6,14 +6,14 @@ export const userMetadataSchema = z.object({
     phone_verified: z.boolean().optional(),
     meta_loaded: z.boolean().optional(),
     sub: z.string().optional(),
-    city: z.string().optional(),
-    country: z.string().optional(),
-    bio: z.string().optional(),
+    city: z.string().max(30).optional(),
+    country: z.string().max(30).optional(),
+    bio: z.string().max(80).optional(),
     gym_place: z.string().optional(),
     gender: z.string().optional(),
     main_sport: z.string().optional(),
-    height: z.string().optional(),
-    weight: z.string().optional(),
+    height: z.string().max(4).optional(),
+    weight: z.string().max(4).optional(),
 });
 
 export const isValidUsername = (username: string): boolean => {
@@ -22,6 +22,6 @@ export const isValidUsername = (username: string): boolean => {
 };
 
 export const isValidName = (name: string): boolean => {
-    const nameRegex = /^[a-zA-ZÀ-ÖØ-öø-ÿ' -]{1,25}$/;
+    const nameRegex = /^[a-zA-ZÀ-ÖØ-öø-ÿ' -]{0,25}$/;
     return nameRegex.test(name);
 };
