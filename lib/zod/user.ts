@@ -13,7 +13,7 @@ export const userMetadataSchema = z.object({
     gender: z.string().optional(),
     main_sport: z.string().optional(),
     height: z.string().max(4).optional(),
-    weight: z.string().max(4).optional(),
+    weight: z.string().max(6).optional(),
 });
 
 export const isValidUsername = (username: string): boolean => {
