@@ -14,8 +14,8 @@ export const GET = (async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string;
     const searchParams = req.nextUrl.searchParams;
 
-    const since = searchParams.get('since');
     // Récupération des filtres
+    const since = searchParams.get('since');
     const workoutTemplateId = searchParams.get('workoutTemplateId');
     const workoutProgramId = searchParams.get('workoutProgramId');
     const onlyPublic = searchParams.get('onlyPublic');

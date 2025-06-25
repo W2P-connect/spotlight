@@ -28,6 +28,7 @@ const getProfileData = async (userId: Profile["id"], publicData = false) => {
                 },
                 where: { isPublic: true }
             },
+            ExerciseGoal: true,
         },
     });
 

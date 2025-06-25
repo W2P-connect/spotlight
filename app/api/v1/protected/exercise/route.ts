@@ -42,6 +42,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         }
     });
 
+    console.log(exercises.length);
+
     return apiResponse({
         message: 'Successfully geted exercises',
         data: exercises,

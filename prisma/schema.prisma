@@ -34,9 +34,26 @@ model Profile {
   WorkoutHistory        WorkoutHistory[]
   workoutPrograms       WorkoutProgram[]
   workoutTemplates      WorkoutTemplate[]
+  ExerciseGoal          ExerciseGoal[]
 
   @@index([searchValue])
   @@map("profile")
+}
+
+model ExerciseGoal {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  exerciseId String   @map("execise_id") @db.Uuid
+  targetKg   Float    @map("target_kg")
+  currentRM  Float    @default(0) @map("current_rm")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  profile  Profile  @relation(fields: [userId], references: [id])
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+
+  @@unique([userId, exerciseId])
+  @@map("exercise_goal")
 }
 
 model Follow {
@@ -171,6 +188,7 @@ model Exercise {
   exerciseToMuscles ExerciseToMuscle[]
   workoutHistories  WorkoutHistoryExercise[]
   workoutTemplates  WorkoutTemplateExercise[]
+  ExerciseGoal      ExerciseGoal[]
 
   @@index([updatedAt])
   @@index([ownerId])
