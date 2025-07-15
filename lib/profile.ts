@@ -22,12 +22,14 @@ const getProfileData = async (userId: Profile["id"], publicData = false) => {
             following: { select: { followingId: true } },
             followers: { select: { followerId: true } },
             Like: { select: { postId: true } },
-            WorkoutHistory: {
-                include: {
-                    exercises: { include: { exercise: true } }
-                },
-                where: { isPublic: true }
-            },
+            WorkoutHistory: publicData
+                ? {
+                    include: {
+                        exercises: { include: { exercise: true } }
+                    },
+                    where: { isPublic: true }
+                }
+                : undefined,
             ExerciseGoal: true,
         },
     });
@@ -37,17 +39,19 @@ const getProfileData = async (userId: Profile["id"], publicData = false) => {
     const profileData = {
         ...profile,
         ...user.user,
-        posts: profile.WorkoutHistory.map(workout => ({
-            ...workout,
-            owner: {
-                id: profile.id,
-                username: profile.username,
-                profilePicture: profile.profilePicture,
-                firtsName: profile.firstName,
-                lastName: profile.lastName,
-                displayName: profile.displayName
-            }
-        })),
+        posts: publicData
+            ? profile.WorkoutHistory.map(workout => ({
+                ...workout,
+                owner: {
+                    id: profile.id,
+                    username: profile.username,
+                    profilePicture: profile.profilePicture,
+                    firtsName: profile.firstName,
+                    lastName: profile.lastName,
+                    displayName: profile.displayName
+                }
+            }))
+            : undefined,
         profilePicture: profile.profilePicture,
         followers: profile?.followers.map(f => f.followerId),
         following: profile?.following.map(f => f.followingId),
