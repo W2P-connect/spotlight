@@ -33,7 +33,7 @@ Demande le fichier `.env`, puis place-le à la racine du projet.\
 npm run dev
 ```
 
-Par défaut, l'app tourne sur : [http://localhost:4000](http://localhost:4000)
+Par défaut, l'app tourne sur : [http://localhost:3123](http://localhost:3123)
 
 ---
 
