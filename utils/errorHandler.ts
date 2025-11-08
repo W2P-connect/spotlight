@@ -28,12 +28,10 @@ export function withErrorHandler(handler: Handler): Handler {
             return await handler(req, ctx);
         } catch (error: any) {
 
-            console.log("error", error);
-
             const user_id = req.headers.get("x-user-id");
 
             try {
-                await prisma.errorLog.create({
+                await prisma.log.create({
                     data: {
                         level: "error",
                         message: error.message || "Unknown error",
@@ -74,12 +72,12 @@ export async function logWarning({
     endpoint: string;
     userId?: string | null;
     metadata?: Json;
-    level?: "warning" | "error";
+    level?: "warning" | "error" | "log";
 }) {
     try {
         const safeMetadata = isJsonSerializable(metadata) ? metadata : { note: "Unserializable metadata" };
 
-        await prisma.errorLog.create({
+        await prisma.log.create({
             data: {
                 level,
                 message,
