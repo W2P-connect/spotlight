@@ -116,11 +116,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     if (workoutError) {
         console.error("Error creating workout:", workoutError);
         return apiResponse({
-            message: "Failed to create workout",
+            message: `Failed to create workout (${workoutError.cause})`,
             success: false,
             status: 500,
             log: {
-                message: "Failed to create workout",
+                message: `Failed to create workout (${workoutError.cause})`,
                 metadata: {
                     body,
                     error: safeStringify(workoutError),
