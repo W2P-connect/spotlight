@@ -4,6 +4,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withErrorHandler } from '@/utils/errorHandler';
 import { apiResponse } from '@/utils/apiResponse';
+import { updateWorkoutProgramSchema } from '@/lib/zod/program';
 
 //DELETE /api/v1/protected/workout-program/c06c9f81-efa4-4c8f-9879-a82de622858c 404
 
@@ -66,18 +67,50 @@ export const PUT = withErrorHandler(async (
     };
 
     const body = await req.json();
+    const parsedData = updateWorkoutProgramSchema.safeParse(body);
+
+    if (!parsedData.success) {
+        return apiResponse({
+            message: 'Invalid request body',
+            success: false,
+            req: req,
+            log: {
+                message: 'Invalid request body',
+                metadata: {
+                    body,
+                    error: parsedData.error.message,
+                },
+            }
+        });
+    }
 
     try {
+        const updateData: {
+            name?: string;
+            startDate?: Date | null;
+            endDate?: Date | null;
+            archived?: boolean;
+        } = {};
+
+        if (parsedData.data.name !== undefined) {
+            updateData.name = parsedData.data.name;
+        }
+        if (parsedData.data.startDate !== undefined) {
+            updateData.startDate = parsedData.data.startDate ? new Date(parsedData.data.startDate) : null;
+        }
+        if (parsedData.data.endDate !== undefined) {
+            updateData.endDate = parsedData.data.endDate ? new Date(parsedData.data.endDate) : null;
+        }
+        if (parsedData.data.archived !== undefined) {
+            updateData.archived = parsedData.data.archived;
+        }
+
         await prisma.workoutProgram.update({
             where: {
                 ownerId: userId,
                 id: programId
             },
-            data: {
-                name: body.name,
-                startDate: body.startDate ? new Date(body.startDate) : undefined,
-                endDate: body.endDate ? new Date(body.endDate) : undefined
-            }
+            data: updateData
         });
 
         return apiResponse({

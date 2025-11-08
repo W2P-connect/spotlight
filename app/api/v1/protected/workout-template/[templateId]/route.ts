@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { z } from "zod";
 import { withErrorHandler } from '@/utils/errorHandler';
 import { apiResponse } from '@/utils/apiResponse';
+import { updateWorkoutTemplateSchema } from '@/lib/zod/template';
 
 export const DELETE = withErrorHandler(async (
     req: NextRequest,
@@ -53,14 +54,38 @@ export const PUT = withErrorHandler(async (
     const { templateId } = await params
 
     const body = await req.json();
+    const parsedData = updateWorkoutTemplateSchema.safeParse(body);
+
+    if (!parsedData.success) {
+        return apiResponse({
+            message: 'Invalid request body',
+            success: false,
+            req: req,
+            log: {
+                message: 'Invalid request body',
+                metadata: {
+                    body,
+                    error: parsedData.error.message,
+                },
+            }
+        });
+    }
 
     try {
+        const updateData: { name?: string; archived?: boolean } = {};
+        if (parsedData.data.name !== undefined) {
+            updateData.name = parsedData.data.name;
+        }
+        if (parsedData.data.archived !== undefined) {
+            updateData.archived = parsedData.data.archived;
+        }
+
         await prisma.workoutTemplate.update({
             where: {
                 ownerId: userId,
                 id: templateId
             },
-            data: { name: body.name }
+            data: updateData
         });
 
         return apiResponse({

@@ -22,7 +22,7 @@ model Profile {
   profilePicture        String?               @map("profil_picture")
   Comment               Comment[]
   CommentLike           CommentLike[]
-  ErrorLog              ErrorLog[]
+  Log                   Log[]
   exercises             Exercise[]
   FailedClientRequest   FailedClientRequest[]
   following             Follow[]              @relation("UserFollowing")
@@ -79,6 +79,7 @@ model WorkoutProgram {
   index                Int                             @unique @default(autoincrement())
   color                String?
   deletedAt            DateTime?
+  archived             Boolean                         @default(false)
   workoutHistory       WorkoutHistory[]
   owner                Profile                         @relation(fields: [ownerId], references: [id])
   workoutTemplateLinks WorkoutProgramWorkoutTemplate[]
@@ -94,6 +95,7 @@ model WorkoutTemplate {
   createdAt           DateTime                        @default(now())
   updatedAt           DateTime                        @default(now()) @updatedAt
   deletedAt           DateTime?
+  archived            Boolean                         @default(false)
   type                TemplateType                    @default(body)
   workoutHistory      WorkoutHistory[]
   workoutProgramLinks WorkoutProgramWorkoutTemplate[]
@@ -310,7 +312,7 @@ model Notification {
   @@map("notification")
 }
 
-model ErrorLog {
+model Log {
   id          Int        @id @default(autoincrement())
   createdAt   DateTime   @default(now())
   level       ErrorLevel
@@ -327,7 +329,7 @@ model ErrorLog {
   @@index([createdAt])
   @@index([userId])
   @@index([level])
-  @@map("error_log")
+  @@map("log")
 }
 
 model FailedClientRequest {
@@ -362,6 +364,7 @@ model Constantes {
 enum ErrorLevel {
   error
   warning
+  log
 }
 
 enum Role {

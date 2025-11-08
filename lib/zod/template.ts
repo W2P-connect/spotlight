@@ -19,6 +19,11 @@ export const workoutTemplateLinkSchema = z.object({
   updatedAt: z.coerce.date().optional(),
 }).strip()
 
+export const updateWorkoutTemplateSchema = z.object({
+  name: z.string().max(30).optional(),
+  archived: z.boolean().optional(),
+}).strip()
+
 export const updateWorkoutTemplateExerciseSchema = z.object({
   minReps: z.array(z.number().int().nonnegative()),
   maxReps: z.array(z.number().int().nonnegative()).optional(),
