@@ -113,9 +113,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         .select()
         .single();
 
-    if (workoutError) {
-        console.error("Error creating workout:", workoutError);
-        
+    if (workoutError) {        
         // Check if it's a unique constraint error (PostgreSQL code 23505 or duplicate key)
         const errorMsg = typeof workoutError.message === 'string' ? workoutError.message : String(workoutError.message || '')
         const errorCause = typeof workoutError.cause === 'string' ? workoutError.cause : String(workoutError.cause || '')
