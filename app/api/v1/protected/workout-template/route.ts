@@ -95,30 +95,55 @@ export const POST = async (req: NextRequest) => {
         });
     }
 
-    const newWorkoutTemplate = await prisma.workoutTemplate.create({
-        data: {
-            ...parsedBody.data,
-            ownerId: userId
-        }
-    })
+    try {
+        const newWorkoutTemplate = await prisma.workoutTemplate.create({
+            data: {
+                ...parsedBody.data,
+                ownerId: userId
+            }
+        })
 
-    if (!newWorkoutTemplate) {
+        console.log("Successfully created workout template", newWorkoutTemplate.id);
+
         return apiResponse({
-            message: 'Failed to create workout template',
+            message: 'Successfully created workout template',
+            data: newWorkoutTemplate,
+            success: true,
+        });
+    } catch (error: any) {
+        console.error("Error creating workout template:", error);
+        
+        // Check if it's a unique constraint error (Prisma code P2002 or duplicate key)
+        const errorMsg = typeof error.message === 'string' ? error.message : String(error.message || '')
+        const errorCode = error.code || ''
+        
+        const isUniqueError = 
+            errorCode === 'P2002' ||
+            errorMsg.toLowerCase().includes('duplicate key') ||
+            errorMsg.toLowerCase().includes('unique constraint') ||
+            errorMsg.toLowerCase().includes('unique violation')
+        
+        const errorMessage = errorMsg || 'Unknown error'
+        
+        console.log("Error creating workout template", error);
+
+        return apiResponse({
+            message: isUniqueError 
+                ? `Workout template already exists (${errorMessage})`
+                : `Failed to create workout template (${errorMessage})`,
+            error: errorMessage,
             success: false,
+            status: isUniqueError ? 409 : 500,
             req: req,
             log: {
-                message: 'Failed to create workout template',
+                message: `Failed to create workout template: ${errorMessage}`,
                 metadata: {
-                    body: parsedBody.data
+                    body: parsedBody.data,
+                    error: safeStringify(error),
+                    errorCode: error.code,
+                    errorMeta: error.meta,
                 },
             }
         });
     }
-
-    return apiResponse({
-        message: 'Successfully created workout template',
-        data: newWorkoutTemplate,
-        success: true,
-    });
 }
