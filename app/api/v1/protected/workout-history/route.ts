@@ -115,15 +115,35 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     if (workoutError) {
         console.error("Error creating workout:", workoutError);
+        
+        // Check if it's a unique constraint error (PostgreSQL code 23505 or duplicate key)
+        const errorMsg = typeof workoutError.message === 'string' ? workoutError.message : String(workoutError.message || '')
+        const errorCause = typeof workoutError.cause === 'string' ? workoutError.cause : String(workoutError.cause || '')
+        
+        const isUniqueError = 
+            workoutError.code === '23505' ||
+            errorMsg.toLowerCase().includes('duplicate key') ||
+            errorMsg.toLowerCase().includes('unique constraint')
+        
+        const errorMessage = errorMsg || errorCause || 'Unknown error'
+        
+        console.log("Error creating workout history", workoutError) 
+
         return apiResponse({
-            message: `Failed to create workout (${workoutError.cause})`,
+            message: isUniqueError 
+                ? `Workout already exists (${errorMessage})`
+                : `Failed to create workout (${errorMessage})`,
+            error: errorMessage,
             success: false,
-            status: 500,
+            status: isUniqueError ? 409 : 500,
             log: {
-                message: `Failed to create workout (${workoutError.cause})`,
+                message: `Failed to create workout: ${errorMessage}`,
                 metadata: {
                     body,
                     error: safeStringify(workoutError),
+                    errorCode: workoutError.code,
+                    errorDetails: workoutError.details,
+                    errorHint: workoutError.hint,
                 },
             },
             req: req,
@@ -141,15 +161,24 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     if (exercisesError) {
         console.error("Error creating exercises:", exercisesError);
+        
+        const errorMsg = typeof exercisesError.message === 'string' ? exercisesError.message : String(exercisesError.message || '')
+        const errorCause = typeof exercisesError.cause === 'string' ? exercisesError.cause : String(exercisesError.cause || '')
+        const errorMessage = errorMsg || errorCause || 'Unknown error'
+        
         return apiResponse({
-            message: "Failed to create exercises",
+            message: `Failed to create exercises (${errorMessage})`,
+            error: errorMessage,
             success: false,
             status: 500,
             log: {
-                message: "Failed to create exercises",
+                message: `Failed to create exercises: ${errorMessage}`,
                 metadata: {
                     body,
                     error: safeStringify(exercisesError),
+                    errorCode: exercisesError.code,
+                    errorDetails: exercisesError.details,
+                    errorHint: exercisesError.hint,
                 },
             },
             req: req,
