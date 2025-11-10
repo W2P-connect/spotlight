@@ -56,6 +56,7 @@ export function withErrorHandler(handler: Handler): Handler {
                 success: false,
                 message: "Internal Server Error",
                 status: 500,
+                error,
             });
         }
     };
