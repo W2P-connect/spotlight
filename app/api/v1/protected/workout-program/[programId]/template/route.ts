@@ -53,13 +53,51 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         });
     }
 
-    const newWorkoutTemplateLink = await prisma.workoutProgramWorkoutTemplate.create({
-        data: parsedData.data,
-    });
+    try {
+        const newWorkoutTemplateLink = await prisma.workoutProgramWorkoutTemplate.create({
+            data: parsedData.data,
+        });
 
-    return apiResponse({
-        message: "Successfully created workout program template link",
-        data: newWorkoutTemplateLink,
-        success: true,
-    });
+        return apiResponse({
+            message: "Successfully created workout program template link",
+            data: newWorkoutTemplateLink,
+            success: true,
+        });
+    } catch (error: any) {
+        console.error("Error creating workout program template link:", error);
+        
+        // Check if it's a unique constraint error (Prisma code P2002)
+        const errorMsg = typeof error.message === 'string' ? error.message : String(error.message || '')
+        const errorCode = error.code || ''
+        
+        const isUniqueError = 
+            errorCode === 'P2002' ||
+            errorMsg.toLowerCase().includes('duplicate key') ||
+            errorMsg.toLowerCase().includes('unique constraint') ||
+            errorMsg.toLowerCase().includes('unique violation')
+        
+        const errorMessage = errorMsg || 'Unknown error'
+        
+        console.log("Error creating workout program template link", error);
+
+        return apiResponse({
+            message: isUniqueError 
+                ? `Workout program template link already exists (${errorMessage})`
+                : `Failed to create workout program template link (${errorMessage})`,
+            error: errorMessage,
+            success: false,
+            status: isUniqueError ? 409 : 500,
+            req: req,
+            log: {
+                message: `Failed to create workout program template link: ${errorMessage}`,
+                metadata: {
+                    body,
+                    parsedData: safeStringify(parsedData),
+                    error: safeStringify(error),
+                    errorCode: safeStringify(error.code),
+                    errorMeta: safeStringify(error.meta),
+                },
+            }
+        });
+    }
 });
