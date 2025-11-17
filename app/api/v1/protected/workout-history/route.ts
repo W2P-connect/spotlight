@@ -5,9 +5,10 @@ import { prisma } from '@/lib/prisma';
 import { z } from "zod";
 import { workoutHistoryExerciseSchema, workoutHistorySchema } from '@/lib/zod/history';
 import { apiResponse } from '@/utils/apiResponse';
-import { withErrorHandler } from '@/utils/errorHandler';
+import { withErrorHandler, logWarning } from '@/utils/errorHandler';
 import { safeStringify } from '@/utils/utils';
 import { createAdminClient } from '@/utils/supabase/admin';
+import { processWorkoutHistorySetScores } from '@/lib/utils/oneRepMax';
 
 
 export const GET = (async (req: NextRequest) => {
@@ -180,6 +181,35 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                 },
             },
             req: req,
+        });
+    }
+
+    // Process set scores calculation and storage for all exercises
+    try {
+        await processWorkoutHistorySetScores(
+            workout.id,
+            userId,
+            validatedExercises.map((exercise) => ({
+                id: exercise.id,
+                exerciseId: exercise.exerciseId,
+                nbReps: exercise.nbReps,
+                weight: exercise.weight,
+            })),
+            req.nextUrl.pathname
+        );
+    } catch (setScoreError: any) {
+        // Log error but don't fail the request - set score processing is not critical
+        await logWarning({
+            message: 'Error processing set scores for workout history',
+            endpoint: req.nextUrl.pathname,
+            userId,
+            level: 'error',
+            metadata: {
+                workoutHistoryId: workout.id,
+                exercisesCount: validatedExercises.length,
+                error: setScoreError?.message || String(setScoreError),
+                stackTrace: setScoreError?.stack,
+            },
         });
     }
 

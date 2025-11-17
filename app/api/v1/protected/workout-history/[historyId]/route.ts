@@ -3,9 +3,10 @@ export const dynamic = 'force-dynamic';
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { updateWorkoutHistorySchema } from '@/lib/zod/history';
-import { withErrorHandler } from '@/utils/errorHandler';
+import { withErrorHandler, logWarning } from '@/utils/errorHandler';
 import { apiResponse } from '@/utils/apiResponse';
 import { removeUndefined, safeStringify } from '@/utils/utils';
+import { processWorkoutHistorySetScores } from '@/lib/utils/oneRepMax';
 
 
 export const PUT = withErrorHandler(async (
@@ -50,13 +51,52 @@ export const PUT = withErrorHandler(async (
         ownerId: userId,
       },
       data: parsedBody.data,
+      include: {
+        exercises: {
+          orderBy: {
+            order: 'asc',
+          },
+        },
+      },
     });
+
+    // Process set scores calculation and storage for all exercises
+    // Always recalculate scores after update to ensure they're up to date
+    if (workoutHistory.exercises && workoutHistory.exercises.length > 0) {
+      try {
+        await processWorkoutHistorySetScores(
+          workoutHistory.id,
+          userId,
+          workoutHistory.exercises.map((exercise) => ({
+            id: exercise.id,
+            exerciseId: exercise.exerciseId,
+            nbReps: exercise.nbReps,
+            weight: exercise.weight,
+          })),
+          req.nextUrl.pathname
+        )
+      } catch (setScoreError: any) {
+        // Log error but don't fail the request - set score processing is not critical
+        await logWarning({
+          message: 'Error processing set scores for workout history update',
+          endpoint: req.nextUrl.pathname,
+          userId,
+          level: 'error',
+          metadata: {
+            workoutHistoryId: workoutHistory.id,
+            exercisesCount: workoutHistory.exercises.length,
+            error: setScoreError?.message || String(setScoreError),
+            stackTrace: setScoreError?.stack,
+          },
+        })
+      }
+    }
 
     return apiResponse({
       message: 'Successfully updated workout history',
       data: workoutHistory,
       success: true,
-    });
+    })
   } catch (error: any) {
     if (error.code === 'P2025') {
       return apiResponse({

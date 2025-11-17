@@ -6,8 +6,9 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { workoutHistoryExerciseSchema } from '@/lib/zod/history';
 import { log } from 'console';
-import { withErrorHandler } from '@/utils/errorHandler';
+import { withErrorHandler, logWarning } from '@/utils/errorHandler';
 import { apiResponse } from '@/utils/apiResponse';
+import { calculateAndStoreSetScores } from '@/lib/utils/oneRepMax';
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
     const body = await req.json();
@@ -43,6 +44,34 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             ...parsedBody,
         }
     });
+
+    // Process set scores storage (with PR flags)
+    try {
+        await calculateAndStoreSetScores(
+            newWorkoutHistoryExercise.id,
+            parsedBody.workoutHistoryId,
+            newWorkoutHistoryExercise.exerciseId,
+            userId,
+            newWorkoutHistoryExercise.nbReps,
+            newWorkoutHistoryExercise.weight,
+            req.nextUrl.pathname
+        );
+    } catch (setScoreError: any) {
+        // Log error but don't fail the request - set score processing is not critical
+        await logWarning({
+            message: 'Error processing set scores for new exercise',
+            endpoint: req.nextUrl.pathname,
+            userId,
+            level: 'error',
+            metadata: {
+                workoutHistoryExerciseId: newWorkoutHistoryExercise.id,
+                workoutHistoryId: parsedBody.workoutHistoryId,
+                exerciseId: newWorkoutHistoryExercise.exerciseId,
+                error: setScoreError?.message || String(setScoreError),
+                stackTrace: setScoreError?.stack,
+            },
+        });
+    }
 
     return apiResponse({
         message: "Successfully created history exercise",
