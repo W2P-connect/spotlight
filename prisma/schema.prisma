@@ -35,6 +35,7 @@ model Profile {
   workoutPrograms       WorkoutProgram[]
   workoutTemplates      WorkoutTemplate[]
   ExerciseGoal          ExerciseGoal[]
+  workoutSetScores      WorkoutSetScore[]
 
   @@index([searchValue])
   @@map("profile")
@@ -129,6 +130,7 @@ model WorkoutHistory {
   workoutProgram    WorkoutProgram?          @relation(fields: [workoutProgramId], references: [id])
   workoutTemplate   WorkoutTemplate?         @relation(fields: [workoutTemplateId], references: [id])
   exercises         WorkoutHistoryExercise[]
+  workoutSetScores  WorkoutSetScore[]
 
   @@index([updatedAt])
   @@map("workout_history")
@@ -191,6 +193,7 @@ model Exercise {
   workoutHistories  WorkoutHistoryExercise[]
   workoutTemplates  WorkoutTemplateExercise[]
   ExerciseGoal      ExerciseGoal[]
+  workoutSetScores  WorkoutSetScore[]
 
   @@index([updatedAt])
   @@index([ownerId])
@@ -229,6 +232,7 @@ model WorkoutHistoryExercise {
   intensity        Int[]
   exercise         Exercise       @relation(fields: [exerciseId], references: [id])
   workoutHistory   WorkoutHistory @relation(fields: [workoutHistoryId], references: [id], onDelete: Cascade)
+  workoutSetScores WorkoutSetScore[]
 
   @@map("workout_history_exercise")
 }
