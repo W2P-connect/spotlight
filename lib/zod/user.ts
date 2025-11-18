@@ -25,3 +25,12 @@ export const isValidName = (name: string): boolean => {
     const nameRegex = /^[a-zA-ZÀ-ÖØ-öø-ÿ' -]{0,25}$/;
     return nameRegex.test(name);
 };
+
+export const createExerciseGoalSchema = z.object({
+    exerciseId: z.string().uuid(),
+    targetKg: z.number().positive(),
+}).strip();
+
+export const updateExerciseGoalSchema = z.object({
+    targetKg: z.number().positive().optional(),
+}).strip();
