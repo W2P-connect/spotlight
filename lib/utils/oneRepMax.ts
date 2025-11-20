@@ -16,7 +16,7 @@ export function computeEpley1RM(weight: number, reps: number): number {
 
 /**
  * Calculates and stores scores for all sets in a workout history exercise
- * Also marks the best sets as personal records (isPersonalRecord = true)
+ * Stores set scores (PRs are calculated dynamically)
  * 
  * @param workoutHistoryExerciseId - The ID of the workout history exercise
  * @param workoutHistoryId - The ID of the workout history
@@ -90,55 +90,41 @@ export async function calculateAndStoreSetScores(
     current.weight > best.weight ? current : best
   );
 
-  // Get the current global PR (heaviest weight) for this exercise and user (all workoutSetScore)
-  // IMPORTANT: Do this BEFORE deleting scores, in case we're updating the same exercise
-  const currentGlobalPR = await prisma.workoutSetScore.findFirst({
+  // Get the current global PR (heaviest weight) for this exercise and user
+  // Calculate PR dynamically from all scores (excluding current workout history)
+  const allScoresForExercise = await prisma.workoutSetScore.findMany({
     where: {
       userId,
       exerciseId,
-      isPersonalRecord: true,
       // Exclude scores from this workout history (we're about to update them)
       workoutHistoryId: {
         not: workoutHistoryId,
       },
     },
-    orderBy: {
-      weight: 'desc',
+  })
+
+  // Find PR by weight (heaviest weight), if same weight then more reps wins
+  const currentGlobalPR = allScoresForExercise.reduce(
+    (best, current) => {
+      if (current.weight > best.weight) {
+        return current
+      }
+      if (current.weight === best.weight && current.reps > best.reps) {
+        return current
+      }
+      return best
     },
-  });
-
-  const globalPRWeight = currentGlobalPR?.weight ?? 0;
-
-  // Find the heaviest weight among new sets (could be higher than current PR)
-  const heaviestNewWeight = heaviestWeightInWorkout.weight;
+    { weight: 0, reps: 0 } as { weight: number; reps: number; id?: string }
+  )
 
   // Delete existing scores for this exercise in this workout history
-  // (This won't affect the global PR query above since we excluded this workoutHistoryId)
   await prisma.workoutSetScore.deleteMany({
     where: {
       workoutHistoryExerciseId,
     },
-  });
+  })
 
-  // If we have a new global PR (heavier weight), unmark all previous PRs for this exercise
-  if (heaviestNewWeight > globalPRWeight) {
-    await prisma.workoutSetScore.updateMany({
-      where: {
-        userId,
-        exerciseId,
-        isPersonalRecord: true,
-      },
-      data: {
-        isPersonalRecord: false,
-      },
-    });
-  }
-
-  // Determine the threshold for PR (either new global PR weight or existing one)
-  const prWeightThreshold = Math.max(heaviestNewWeight, globalPRWeight);
-
-  // Store all set scores with isPersonalRecord flag
-  // A set is a PR if it matches or beats the global PR weight (heaviest weight ever lifted)
+  // Store all set scores (PRs are calculated dynamically)
   await prisma.workoutSetScore.createMany({
     data: setScores.map((set) => ({
       workoutHistoryExerciseId,
@@ -149,10 +135,8 @@ export async function calculateAndStoreSetScores(
       score: set.score,
       weight: set.weight,
       reps: set.reps,
-      // Mark as PR if it matches or beats the global PR weight (accounting for floating point precision)
-      isPersonalRecord: Math.abs(set.weight - prWeightThreshold) < 0.01 && set.weight >= prWeightThreshold - 0.01,
     })),
-  });
+  })
 }
 
 /**

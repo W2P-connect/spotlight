@@ -28,9 +28,9 @@ export const isValidName = (name: string): boolean => {
 
 export const createExerciseGoalSchema = z.object({
     exerciseId: z.string().uuid(),
-    targetKg: z.number().positive(),
+    targetKg: z.number().min(0),
 }).strip();
 
 export const updateExerciseGoalSchema = z.object({
-    targetKg: z.number().positive().optional(),
+    targetKg: z.number().min(0).optional(),
 }).strip();
