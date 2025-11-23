@@ -41,10 +41,14 @@ export const PUT = withErrorHandler(async (
     }
 
     try {
-        const updateData: { targetKg?: number } = {};
+        const updateData: { targetKg?: number; order?: number } = {};
 
         if (parsedData.data.targetKg !== undefined) {
             updateData.targetKg = parsedData.data.targetKg;
+        }
+
+        if (parsedData.data.order !== undefined) {
+            updateData.order = parsedData.data.order;
         }
 
         const exerciseGoal = await prisma.exerciseGoal.update({

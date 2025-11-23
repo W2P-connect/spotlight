@@ -4,11 +4,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { withErrorHandler } from '@/utils/errorHandler'
 import { apiResponse } from '@/utils/apiResponse'
-import { z } from 'zod'
-
-const reorderExerciseGoalsSchema = z.object({
-  goalIds: z.array(z.string().uuid()),
-})
+import { reorderExerciseGoalsSchema } from '@/lib/zod/user'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const userId = req.headers.get('x-user-id') as string
@@ -32,9 +28,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   try {
-    const { goalIds } = parsedData.data
+    const { goals } = parsedData.data
 
     // Verify all goals belong to the user
+    const goalIds = goals.map(g => g.goalId)
     const userGoals = await prisma.exerciseGoal.findMany({
       where: {
         userId,
@@ -51,18 +48,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       })
     }
 
-    // For now, we just verify the order is valid
-    // In the future, if we add an 'order' field to ExerciseGoal,
-    // we would update each goal with its order index here
-    // Example:
-    // await Promise.all(
-    //   goalIds.map((goalId, index) =>
-    //     prisma.exerciseGoal.update({
-    //       where: { id: goalId, userId },
-    //       data: { order: index },
-    //     })
-    //   )
-    // )
+    // Update each goal with its new order
+    await Promise.all(
+      goals.map(({ goalId, order }) =>
+        prisma.exerciseGoal.update({
+          where: { id: goalId, userId },
+          data: { order },
+        })
+      )
+    )
 
     return apiResponse({
       message: 'Successfully reordered exercise goals',

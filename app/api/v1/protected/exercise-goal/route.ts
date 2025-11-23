@@ -49,6 +49,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             });
         }
 
+        // Get the max order for this user if order is not provided
+        let order = parsedData.data.order;
+        if (order === undefined) {
+            const maxOrderGoal = await prisma.exerciseGoal.findFirst({
+                where: { userId },
+                orderBy: { order: 'desc' },
+                select: { order: true },
+            });
+            order = maxOrderGoal ? maxOrderGoal.order + 1 : 0;
+        }
+
         // Create or update exercise goal (upsert because of unique constraint)
         const exerciseGoal = await prisma.exerciseGoal.upsert({
             where: {
@@ -61,9 +72,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                 userId,
                 exerciseId: parsedData.data.exerciseId,
                 targetKg: parsedData.data.targetKg,
+                order,
             },
             update: {
                 targetKg: parsedData.data.targetKg,
+                order: parsedData.data.order !== undefined ? parsedData.data.order : undefined,
                 updatedAt: new Date(),
             },
             include: {

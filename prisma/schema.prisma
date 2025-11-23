@@ -43,6 +43,7 @@ model Profile {
 
 model ExerciseGoal {
   id         String   @id @default(uuid()) @db.Uuid
+  order      Int      @default(0)
   userId     String   @map("user_id") @db.Uuid
   exerciseId String   @map("execise_id") @db.Uuid
   targetKg   Float    @map("target_kg")
