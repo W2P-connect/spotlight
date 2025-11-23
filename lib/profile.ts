@@ -30,11 +30,39 @@ const getProfileData = async (userId: Profile["id"], publicData = false) => {
                     where: { isPublic: true }
                 }
                 : undefined,
-            ExerciseGoal: true,
+            ExerciseGoal: { orderBy: { order: 'asc' } },
         },
     });
 
     if (!profile) return null;
+
+    // Fetch WorkoutSetScores for ExerciseGoal exercises when publicData is true
+    let exerciseGoalScores: any[] = [];
+    if (publicData && profile.ExerciseGoal.length > 0) {
+        const exerciseIds = profile.ExerciseGoal.map(goal => goal.exerciseId);
+        exerciseGoalScores = await prisma.workoutSetScore.findMany({
+            where: {
+                userId: userId,
+                exerciseId: { in: exerciseIds }
+            },
+            select: {
+                id: true,
+                workoutHistoryId: true,
+                workoutHistoryExerciseId: true,
+                exerciseId: true,
+                userId: true,
+                setIndex: true,
+                score: true,
+                weight: true,
+                reps: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+    }
 
     const profileData = {
         ...profile,
@@ -72,7 +100,9 @@ const getProfileData = async (userId: Profile["id"], publicData = false) => {
         followersCount: profileData.followersCount,
         posts: profileData.posts,
         like: profileData.like,
-        displayName: profileData.displayName
+        displayName: profileData.displayName,
+        ExerciseGoal: profile.ExerciseGoal,
+        exerciseGoalScores: exerciseGoalScores
     }
 }
 
