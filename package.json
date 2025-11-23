@@ -9,7 +9,8 @@
     "migrate:deploy": "npx prisma migrate deploy",
     "migrate:deploy:seed": "npx prisma migrate deploy && npx tsx lib/seedTriggers.ts",
     "populate:workout-set-scores": "npx tsx lib/scripts/populateWorkoutSetScores.ts",
-    "fix:workout-set-score-rounding": "npx tsx lib/scripts/fixWorkoutSetScoreRounding.ts"
+    "fix:workout-set-score-rounding": "npx tsx lib/scripts/fixWorkoutSetScoreRounding.ts",
+    "fix:workout-history-types": "npx tsx lib/scripts/fixWorkoutHistoryTypes.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",

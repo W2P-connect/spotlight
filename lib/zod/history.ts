@@ -51,6 +51,7 @@ export const workoutHistorySchema = z
     comment: zCleanedComment,
     isPublic: z.boolean().optional(),
     workoutPlace: z.string().nullable().optional(),
+    type: z.enum(['body', 'power']).default('body'),
   })
   .strip();
 
@@ -64,5 +65,6 @@ export const updateWorkoutHistorySchema = z
     workoutPlace: z.string().nullable().optional(),
     date: z.string().datetime().optional(),
     duration: z.number().int().nonnegative().optional(),
+    type: z.enum(['body', 'power']).optional(),
   })
   .strip();
