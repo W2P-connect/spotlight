@@ -9,7 +9,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     const userId = req.headers.get("x-user-id") as string //From middleware;
 
     const profileData = await getProfileData(userId, false);
-
+    
     if (!profileData) {
         return apiResponse({
             message: 'Profile not found',

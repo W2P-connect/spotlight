@@ -27,7 +27,8 @@ export function withErrorHandler(handler: Handler): Handler {
         try {
             return await handler(req, ctx);
         } catch (error: any) {
-
+            process.env.NODE_ENV === "development" 
+                && console.log(error)
             const user_id = req.headers.get("x-user-id");
 
             try {
