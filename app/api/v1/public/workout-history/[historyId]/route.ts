@@ -45,8 +45,15 @@ export const GET = withErrorHandler(async (
         });
     }
 
-    const user = await getProfileData(history.ownerId);
-    if (!user) {
+    // const user = await getProfileData(history.ownerId);
+    // if (!user) {
+    //     return apiResponse({
+    //         message: "History's user not found or is deleted",
+    //         success: false,
+    //         status: 404
+    //     });
+    // } 
+    if (!history.owner.id) {
         return apiResponse({
             message: "History's user not found or is deleted",
             success: false,
@@ -55,10 +62,10 @@ export const GET = withErrorHandler(async (
     }
 
     return apiResponse({
-        message: 'Successfully finded history',
+        message: 'Successfully found history',
         data: {
             history: history,
-            user: user,
+            user: history.owner,
         },
         success: true,
     });
