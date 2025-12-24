@@ -54,6 +54,7 @@ model ExerciseGoal {
   exercise Exercise @relation(fields: [exerciseId], references: [id])
 
   @@unique([userId, exerciseId])
+  @@index([userId, order])
   @@map("exercise_goal")
 }
 
@@ -66,6 +67,8 @@ model Follow {
   following   Profile  @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
   @@map("follow")
 }
 
@@ -133,6 +136,7 @@ model WorkoutHistory {
   workoutSetScores  WorkoutSetScore[]
 
   @@index([updatedAt])
+  @@index([ownerId, isPublic])
   @@map("workout_history")
 }
 
@@ -146,6 +150,7 @@ model Like {
 
   @@unique([userId, postId])
   @@index([postId])
+  @@index([userId])
   @@map("like")
 }
 
@@ -385,6 +390,7 @@ model WorkoutSetScore {
 
   @@unique([workoutHistoryExerciseId, setIndex])
   @@index([userId, exerciseId])
+  @@index([userId, exerciseId, createdAt])
   @@index([workoutHistoryId])
   @@index([workoutHistoryExerciseId])
   @@map("workout_set_score")
