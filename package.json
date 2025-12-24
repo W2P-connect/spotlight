@@ -28,7 +28,7 @@
     "dotenv": "^16.4.7",
     "expo-server-sdk": "^3.15.0",
     "lucide-react": "^0.468.0",
-    "next": "latest",
+    "next": "15.5.8",
     "next-themes": "^0.4.3",
     "postgres": "^3.4.5",
     "prettier": "^3.3.3",
